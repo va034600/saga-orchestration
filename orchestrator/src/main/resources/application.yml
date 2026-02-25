@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: orchestrator
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orchestrator_db
+    username: saga
+    password: saga
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      region:
+        static: ap-northeast-1
+
+services:
+  order:
+    url: http://localhost:8081
+  payment:
+    url: http://localhost:8083
+
+aws:
+  eventbridge:
+    bus-name: saga-events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
