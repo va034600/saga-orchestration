@@ -7,6 +7,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient
+import software.amazon.awssdk.services.sfn.SfnClient
 import java.net.URI
 
 @Configuration
@@ -17,6 +18,18 @@ class AwsConfig {
         @Value("\${spring.cloud.aws.endpoint:http://localhost:4566}") endpoint: String,
         @Value("\${spring.cloud.aws.region.static:ap-northeast-1}") region: String
     ): EventBridgeClient = EventBridgeClient.builder()
+        .endpointOverride(URI.create(endpoint))
+        .region(Region.of(region))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test"))
+        )
+        .build()
+
+    @Bean
+    fun sfnClient(
+        @Value("\${spring.cloud.aws.endpoint:http://localhost:4566}") endpoint: String,
+        @Value("\${spring.cloud.aws.region.static:ap-northeast-1}") region: String
+    ): SfnClient = SfnClient.builder()
         .endpointOverride(URI.create(endpoint))
         .region(Region.of(region))
         .credentialsProvider(

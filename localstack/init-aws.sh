@@ -41,4 +41,14 @@ awslocal events put-targets \
   --targets "Id=compensation-queue-target,Arn=${QUEUE_ARN}"
 echo "Target added to rule."
 
+# Create Step Functions state machine
+echo "Creating Step Functions state machine: order-saga"
+STATE_MACHINE_ARN=$(awslocal stepfunctions create-state-machine \
+  --name order-saga \
+  --definition "$(cat /etc/localstack/init/ready.d/state-machine.json)" \
+  --role-arn "arn:aws:iam::000000000000:role/stepfunctions-role" \
+  --query 'stateMachineArn' \
+  --output text)
+echo "State machine created: ${STATE_MACHINE_ARN}"
+
 echo "All AWS resources initialized successfully."
