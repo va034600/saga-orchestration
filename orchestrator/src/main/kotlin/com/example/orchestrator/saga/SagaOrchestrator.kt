@@ -4,7 +4,7 @@ import com.example.common.dto.CompensationEvent
 import com.example.common.dto.OrderRequest
 import com.example.common.dto.PaymentRequest
 import com.example.common.dto.SagaResult
-import com.example.common.enums.CompensationType
+import com.example.common.dto.CompensationType
 import com.example.orchestrator.client.ServiceClients
 import com.example.orchestrator.entity.SagaState
 import com.example.orchestrator.entity.SagaStep

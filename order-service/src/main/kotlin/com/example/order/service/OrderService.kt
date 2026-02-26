@@ -2,7 +2,7 @@ package com.example.order.service
 
 import com.example.common.dto.OrderRequest
 import com.example.common.dto.OrderResponse
-import com.example.common.enums.OrderStatus
+import com.example.common.dto.OrderStatus
 import com.example.common.exception.OrderNotFoundException
 import com.example.order.entity.Order
 import com.example.order.repository.OrderRepository

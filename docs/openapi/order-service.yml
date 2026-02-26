@@ -208,7 +208,7 @@ components:
           description: Current status of the order
           enum:
             - PENDING
-            - CONFIRMED
+            - COMPLETED
             - CANCELLED
 
     ErrorResponse:

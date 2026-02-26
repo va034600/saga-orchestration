@@ -1,6 +1,6 @@
 package com.example.payment.entity
 
-import com.example.common.enums.PaymentStatus
+import com.example.common.dto.PaymentStatus
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.Instant

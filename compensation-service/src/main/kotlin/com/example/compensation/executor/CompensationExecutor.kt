@@ -3,7 +3,7 @@ package com.example.compensation.executor
 import com.example.common.dto.CompensationEvent
 import com.example.common.dto.OrderResponse
 import com.example.common.dto.PaymentResponse
-import com.example.common.enums.CompensationType
+import com.example.common.dto.CompensationType
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component

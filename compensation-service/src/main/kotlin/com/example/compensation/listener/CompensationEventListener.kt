@@ -2,7 +2,7 @@ package com.example.compensation.listener
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.example.common.dto.CompensationEvent
-import com.example.common.enums.CompensationStatus
+import com.example.common.dto.CompensationStatus
 import com.example.compensation.entity.Compensation
 import com.example.compensation.executor.CompensationExecutor
 import com.example.compensation.repository.CompensationRepository

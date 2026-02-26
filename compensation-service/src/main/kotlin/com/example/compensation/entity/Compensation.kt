@@ -1,7 +1,7 @@
 package com.example.compensation.entity
 
-import com.example.common.enums.CompensationStatus
-import com.example.common.enums.CompensationType
+import com.example.common.dto.CompensationStatus
+import com.example.common.dto.CompensationType
 import jakarta.persistence.*
 import java.time.Instant
 

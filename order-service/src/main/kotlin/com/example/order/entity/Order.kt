@@ -1,6 +1,6 @@
 package com.example.order.entity
 
-import com.example.common.enums.OrderStatus
+import com.example.common.dto.OrderStatus
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.Instant

@@ -60,13 +60,6 @@ components:
         compensationType:
           type: string
           description: Type of compensation to perform
-        productId:
-          type: string
-          description: Identifier of the product involved in the compensation
-        quantity:
-          type: integer
-          format: int32
-          description: Number of units involved in the compensation
         paymentId:
           type: string
           description: Identifier of the payment involved in the compensation

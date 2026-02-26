@@ -100,6 +100,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/saga/orders/async:
+    post:
+      summary: Execute order saga asynchronously
+      operationId: executeOrderSagaAsync
+      description: Initiates an asynchronous order saga via AWS Step Functions and returns the execution ARN immediately.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '202':
+          description: Saga execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartResult'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/saga/executions:
+    get:
+      summary: Get async saga execution status
+      operationId: getExecutionStatus
+      description: Retrieves the current status of an asynchronous saga execution.
+      parameters:
+        - name: executionArn
+          in: query
+          required: true
+          description: ARN of the Step Functions execution
+          schema:
+            type: string
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Execution status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionStatus'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   parameters:
     OrderIdPath:
@@ -182,7 +243,7 @@ components:
           description: Current status of the order
           enum:
             - PENDING
-            - CONFIRMED
+            - COMPLETED
             - CANCELLED
 
     PaymentResponse:
@@ -205,6 +266,38 @@ components:
         success:
           type: boolean
           description: Whether the payment operation was successful
+
+    StartResult:
+      type: object
+      properties:
+        executionArn:
+          type: string
+          description: ARN of the Step Functions execution
+        orderId:
+          type: string
+          description: Unique identifier of the order
+
+    ExecutionStatus:
+      type: object
+      properties:
+        executionArn:
+          type: string
+          description: ARN of the Step Functions execution
+        status:
+          type: string
+          description: Current execution status
+        input:
+          type: string
+          description: Execution input JSON
+        output:
+          type: string
+          description: Execution output JSON
+        startDate:
+          type: string
+          description: Execution start timestamp
+        stopDate:
+          type: string
+          description: Execution stop timestamp
 
     ErrorResponse:
       type: object

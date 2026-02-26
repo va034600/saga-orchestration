@@ -2,7 +2,7 @@ package com.example.payment.service
 
 import com.example.common.dto.PaymentRequest
 import com.example.common.dto.PaymentResponse
-import com.example.common.enums.PaymentStatus
+import com.example.common.dto.PaymentStatus
 import com.example.common.exception.PaymentFailedException
 import com.example.payment.entity.Payment
 import com.example.payment.repository.PaymentRepository
