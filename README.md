@@ -161,7 +161,24 @@ PostgreSQL 16 と LocalStack 3.8 が起動し、以下が自動作成される:
 - **EventBridge**: `saga-events` バス + `compensation-rule`
 - **Step Functions**: `order-saga` ステートマシン
 
-### 2. LocalStack の起動確認
+### 2. ビルド
+
+```bash
+./gradlew build
+```
+
+### 3. 各サービス起動
+
+```bash
+./gradlew :orchestrator:bootRun
+./gradlew :order-service:bootRun
+./gradlew :payment-service:bootRun
+./gradlew :compensation-service:bootRun
+```
+
+## 動作確認
+
+### LocalStack の起動確認
 
 ```bash
 # ヘルスチェック
@@ -175,29 +192,17 @@ aws --endpoint-url=http://localhost:4566 events list-event-buses
 
 # Step Functions ステートマシン確認
 aws --endpoint-url=http://localhost:4566 stepfunctions list-state-machines
-
-# PostgreSQL DB一覧確認
-docker exec postgres psql -U saga -d saga -tc "SELECT datname FROM pg_database WHERE datname LIKE '%_db'"
 ```
 
 > `awslocal` がインストール済みの場合は `aws --endpoint-url=...` の代わりに `awslocal` コマンドが使えます。
 
-### 3. ビルド
+### PostgreSQL の起動確認
 
 ```bash
-./gradlew build
+docker exec postgres psql -U saga -d saga -tc "SELECT datname FROM pg_database WHERE datname LIKE '%_db'"
 ```
 
-### 4. 各サービス起動
-
-```bash
-./gradlew :orchestrator:bootRun
-./gradlew :order-service:bootRun
-./gradlew :payment-service:bootRun
-./gradlew :compensation-service:bootRun
-```
-
-### 5. ヘルスチェック
+### ヘルスチェック
 
 ```bash
 curl http://localhost:8080/actuator/health
@@ -205,8 +210,6 @@ curl http://localhost:8081/actuator/health
 curl http://localhost:8083/actuator/health
 curl http://localhost:8084/actuator/health
 ```
-
-## 動作確認
 
 ### 同期Saga
 
