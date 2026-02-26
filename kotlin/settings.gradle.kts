@@ -22,9 +22,3 @@ include(
     "compensation-service",
     "orchestrator"
 )
-
-project(":common").projectDir = file("kotlin/common")
-project(":order-service").projectDir = file("kotlin/order-service")
-project(":payment-service").projectDir = file("kotlin/payment-service")
-project(":compensation-service").projectDir = file("kotlin/compensation-service")
-project(":orchestrator").projectDir = file("kotlin/orchestrator")

@@ -73,23 +73,27 @@ Step Functions (order-saga)
 
 ```
 saga-orchestration/
-├── kotlin/
-│   ├── common/                  # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
-│   │   └── openapi.yml          #   共通スキーマ (コード生成用)
-│   ├── order-service/           # 注文管理 (:8081)
+├── kotlin/                          # Gradle ルートプロジェクト
+│   ├── build.gradle.kts
+│   ├── settings.gradle.kts
+│   ├── gradle.properties
+│   ├── gradlew / gradlew.bat
+│   ├── common/                      # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
+│   │   └── openapi.yml              #   共通スキーマ (コード生成用)
+│   ├── order-service/               # 注文管理 (:8081)
 │   │   └── openapi.yml
-│   ├── payment-service/         # 決済管理 (:8083)
+│   ├── payment-service/             # 決済管理 (:8083)
 │   │   └── openapi.yml
-│   ├── compensation-service/    # 非同期補償処理 (:8084)
+│   ├── compensation-service/        # 非同期補償処理 (:8084)
 │   │   └── openapi.yml
-│   └── orchestrator/            # Sagaオーケストレーター (:8080)
+│   └── orchestrator/                # Sagaオーケストレーター (:8080)
 │       └── openapi.yml
-├── docker/
-│   ├── docker-compose.yml   # PostgreSQL + LocalStack
-│   ├── postgres/            # DB初期化スクリプト (docker-entrypoint-initdb.d)
-│   └── localstack/
-│       ├── init-aws.sh      # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
-│       └── state-machine.json # Step Functions ステートマシン定義 (非同期Saga)
+└── docker/
+    ├── docker-compose.yml           # PostgreSQL + LocalStack
+    ├── postgres/                    # DB初期化スクリプト (docker-entrypoint-initdb.d)
+    └── localstack/
+        ├── init-aws.sh              # LocalStack起動時に自動実行
+        └── state-machine.json       # Step Functions ステートマシン定義
 ```
 
 ## 各サービスの責務
@@ -170,12 +174,14 @@ PostgreSQL 16 と LocalStack 3.8 が起動し、以下が自動作成される:
 ### 2. ビルド
 
 ```bash
+cd kotlin
 ./gradlew build
 ```
 
 ### 3. 各サービス起動
 
 ```bash
+cd kotlin
 ./gradlew :orchestrator:bootRun
 ./gradlew :order-service:bootRun
 ./gradlew :payment-service:bootRun
