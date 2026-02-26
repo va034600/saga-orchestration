@@ -74,6 +74,7 @@ Step Functions (order-saga)
 ```
 saga-orchestration/
 ├── common/                  # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
+│   └── openapi.yml          #   共通スキーマ (コード生成用)
 ├── order-service/           # 注文管理 (:8081)
 │   └── openapi.yml
 ├── payment-service/         # 決済管理 (:8083)
@@ -87,8 +88,6 @@ saga-orchestration/
 ├── localstack/
 │   ├── init-aws.sh          # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
 │   └── state-machine.json   # Step Functions ステートマシン定義 (非同期Saga)
-└── docs/openapi/
-    └── models.yml           # 共通スキーマ (コード生成用)
 ```
 
 ## 各サービスの責務
@@ -268,4 +267,4 @@ API仕様は各サービスモジュール直下に配置:
 - `orchestrator/openapi.yml`
 - `compensation-service/openapi.yml`
 
-共通スキーマ（コード生成用）: `docs/openapi/models.yml`
+共通スキーマ（コード生成用）: `common/openapi.yml`

@@ -5,7 +5,7 @@ plugins {
 
 openApiGenerate {
     generatorName.set("kotlin")
-    inputSpec.set("$rootDir/docs/openapi/models.yml")
+    inputSpec.set("$projectDir/openapi.yml")
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
     modelPackage.set("com.example.common.dto")
     generateApiTests.set(false)
