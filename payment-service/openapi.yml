@@ -8,9 +8,13 @@ servers:
   - url: http://localhost:8083
     description: Local development server
 
+tags:
+  - name: Payment
+
 paths:
   /api/payments/authorize:
     post:
+      tags: [Payment]
       summary: Authorize payment
       operationId: authorizePayment
       description: Authorizes a payment for the specified order and amount.
@@ -51,6 +55,7 @@ paths:
 
   /api/payments/{orderId}/capture:
     put:
+      tags: [Payment]
       summary: Capture payment
       operationId: capturePayment
       description: Captures a previously authorized payment for the specified order.
@@ -86,6 +91,7 @@ paths:
 
   /api/payments/{orderId}/refund:
     put:
+      tags: [Payment]
       summary: Refund payment
       operationId: refundPayment
       description: Refunds a previously captured or authorized payment for the specified order.

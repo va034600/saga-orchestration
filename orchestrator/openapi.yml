@@ -8,9 +8,13 @@ servers:
   - url: http://localhost:8080
     description: Local development server
 
+tags:
+  - name: Saga
+
 paths:
   /api/saga/orders:
     post:
+      tags: [Saga]
       summary: Execute order saga
       operationId: executeOrderSaga
       description: Initiates and orchestrates the complete order saga including order creation, inventory reservation, and payment authorization.
@@ -51,6 +55,7 @@ paths:
 
   /api/saga/states/{orderId}:
     get:
+      tags: [Saga]
       summary: Get saga state
       operationId: getSagaState
       description: Retrieves the current state of a saga for the specified order.
@@ -79,6 +84,7 @@ paths:
 
   /api/saga/states:
     get:
+      tags: [Saga]
       summary: List all saga states
       operationId: listSagaStates
       description: Retrieves the current state of all sagas.
@@ -102,6 +108,7 @@ paths:
 
   /api/saga/orders/async:
     post:
+      tags: [Saga]
       summary: Execute order saga asynchronously
       operationId: executeOrderSagaAsync
       description: Initiates an asynchronous order saga via AWS Step Functions and returns the execution ARN immediately.
@@ -136,6 +143,7 @@ paths:
 
   /api/saga/executions:
     get:
+      tags: [Saga]
       summary: Get async saga execution status
       operationId: getExecutionStatus
       description: Retrieves the current status of an asynchronous saga execution.

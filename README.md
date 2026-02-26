@@ -75,15 +75,20 @@ Step Functions (order-saga)
 saga-orchestration/
 ├── common/                  # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
 ├── order-service/           # 注文管理 (:8081)
+│   └── openapi.yml
 ├── payment-service/         # 決済管理 (:8083)
+│   └── openapi.yml
 ├── compensation-service/    # 非同期補償処理 (:8084)
+│   └── openapi.yml
 ├── orchestrator/            # Sagaオーケストレーター (:8080)
+│   └── openapi.yml
 ├── docker-compose.yml       # PostgreSQL + LocalStack
 ├── postgres/                # DB初期化スクリプト (docker-entrypoint-initdb.d)
 ├── localstack/
 │   ├── init-aws.sh          # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
 │   └── state-machine.json   # Step Functions ステートマシン定義 (非同期Saga)
-└── docs/openapi/            # OpenAPI仕様
+└── docs/openapi/
+    └── models.yml           # 共通スキーマ (コード生成用)
 ```
 
 ## 各サービスの責務
@@ -256,9 +261,11 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 
 ## OpenAPI
 
-API仕様は `docs/openapi/` に配置:
+API仕様は各サービスモジュール直下に配置:
 
-- `order-service.yml`
-- `payment-service.yml`
-- `orchestrator.yml`
-- `compensation-service.yml`
+- `order-service/openapi.yml`
+- `payment-service/openapi.yml`
+- `orchestrator/openapi.yml`
+- `compensation-service/openapi.yml`
+
+共通スキーマ（コード生成用）: `docs/openapi/models.yml`
