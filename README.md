@@ -84,11 +84,12 @@ saga-orchestration/
 │   │   └── openapi.yml
 │   └── orchestrator/            # Sagaオーケストレーター (:8080)
 │       └── openapi.yml
-├── docker-compose.yml       # PostgreSQL + LocalStack
-├── postgres/                # DB初期化スクリプト (docker-entrypoint-initdb.d)
-├── localstack/
-│   ├── init-aws.sh          # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
-│   └── state-machine.json   # Step Functions ステートマシン定義 (非同期Saga)
+├── docker/
+│   ├── docker-compose.yml   # PostgreSQL + LocalStack
+│   ├── postgres/            # DB初期化スクリプト (docker-entrypoint-initdb.d)
+│   └── localstack/
+│       ├── init-aws.sh      # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
+│       └── state-machine.json # Step Functions ステートマシン定義 (非同期Saga)
 ```
 
 ## 各サービスの責務
@@ -154,10 +155,10 @@ Idempotency-Key: create-order-ORD-001
 ### 1. インフラ起動
 
 ```bash
-docker-compose up -d
+docker-compose -f docker/docker-compose.yml up -d
 ```
 
-> **注意**: `postgres/init-db.sh` は PostgreSQL の `docker-entrypoint-initdb.d` で実行されるため、**ボリューム初回作成時のみ**動作します。DB を再作成するには `docker-compose down -v && docker-compose up -d` を実行してください。
+> **注意**: `docker/postgres/init-db.sh` は PostgreSQL の `docker-entrypoint-initdb.d` で実行されるため、**ボリューム初回作成時のみ**動作します。DB を再作成するには `docker-compose -f docker/docker-compose.yml down -v && docker-compose -f docker/docker-compose.yml up -d` を実行してください。
 
 PostgreSQL 16 と LocalStack 3.8 が起動し、以下が自動作成される:
 
