@@ -1,24 +1,17 @@
 {
-  "Comment": "Order Saga - async orchestration",
+  "Comment": "Order Saga - async orchestration via Lambda proxy",
   "StartAt": "CreateOrder",
   "States": {
     "CreateOrder": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint": "http://host.docker.internal:8081/api/orders",
-        "Method": "POST",
-        "Headers": {
-          "Content-Type": ["application/json"],
-          "Idempotency-Key.$": "States.Format('create-order-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        },
-        "RequestBody": {
-          "orderId.$": "$.orderId",
-          "productId.$": "$.productId",
-          "quantity.$": "$.quantity",
-          "amount.$": "$.amount"
-        }
+        "action": "CREATE_ORDER",
+        "orderId.$": "$.orderId",
+        "productId.$": "$.productId",
+        "quantity.$": "$.quantity",
+        "amount.$": "$.amount",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.createOrderResult",
       "Next": "ExecutePayment",
@@ -32,19 +25,12 @@
     },
     "ExecutePayment": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint": "http://host.docker.internal:8083/api/payments/authorize",
-        "Method": "POST",
-        "Headers": {
-          "Content-Type": ["application/json"],
-          "Idempotency-Key.$": "States.Format('authorize-payment-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        },
-        "RequestBody": {
-          "orderId.$": "$.orderId",
-          "amount.$": "$.amount"
-        }
+        "action": "EXECUTE_PAYMENT",
+        "orderId.$": "$.orderId",
+        "amount.$": "$.amount",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.paymentResult",
       "Next": "CapturePayment",
@@ -58,14 +44,11 @@
     },
     "CapturePayment": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint.$": "States.Format('http://host.docker.internal:8083/api/payments/{}/capture', $.orderId)",
-        "Method": "PUT",
-        "Headers": {
-          "Idempotency-Key.$": "States.Format('capture-payment-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        }
+        "action": "CAPTURE_PAYMENT",
+        "orderId.$": "$.orderId",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.captureResult",
       "Next": "CompleteOrder",
@@ -79,14 +62,11 @@
     },
     "CompleteOrder": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint.$": "States.Format('http://host.docker.internal:8081/api/orders/{}/complete', $.orderId)",
-        "Method": "PUT",
-        "Headers": {
-          "Idempotency-Key.$": "States.Format('complete-order-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        }
+        "action": "COMPLETE_ORDER",
+        "orderId.$": "$.orderId",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.completeResult",
       "Next": "SagaSucceeded",
@@ -103,14 +83,11 @@
     },
     "CompensateRefundPayment": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint.$": "States.Format('http://host.docker.internal:8083/api/payments/{}/refund', $.orderId)",
-        "Method": "PUT",
-        "Headers": {
-          "Idempotency-Key.$": "States.Format('comp-refund-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        }
+        "action": "COMPENSATE_REFUND",
+        "orderId.$": "$.orderId",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.refundResult",
       "Next": "CompensateCancelOrder",
@@ -124,14 +101,11 @@
     },
     "CompensateCancelOrder": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::http:invoke",
+      "Resource": "arn:aws:lambda:ap-northeast-1:000000000000:function:saga-http-proxy",
       "Parameters": {
-        "ApiEndpoint.$": "States.Format('http://host.docker.internal:8081/api/orders/{}/cancel', $.orderId)",
-        "Method": "PUT",
-        "Headers": {
-          "Idempotency-Key.$": "States.Format('comp-cancel-{}', $.orderId)",
-          "X-Trace-Id.$": "$.traceId"
-        }
+        "action": "COMPENSATE_CANCEL",
+        "orderId.$": "$.orderId",
+        "traceId.$": "$.traceId"
       },
       "ResultPath": "$.cancelResult",
       "Next": "SagaFailed",

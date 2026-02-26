@@ -80,7 +80,9 @@ saga-orchestration/
 ├── orchestrator/            # Sagaオーケストレーター (:8080)
 ├── docker-compose.yml       # PostgreSQL + LocalStack
 ├── postgres/                # DB初期化スクリプト (docker-entrypoint-initdb.d)
-├── localstack/              # AWS初期化スクリプト + ステートマシン定義
+├── localstack/
+│   ├── init-aws.sh          # LocalStack起動時に自動実行: SQS, EventBridge, Step Functions作成
+│   └── state-machine.json   # Step Functions ステートマシン定義 (非同期Saga)
 └── docs/openapi/            # OpenAPI仕様
 ```
 
