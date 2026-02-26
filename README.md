@@ -73,16 +73,17 @@ Step Functions (order-saga)
 
 ```
 saga-orchestration/
-├── common/                  # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
-│   └── openapi.yml          #   共通スキーマ (コード生成用)
-├── order-service/           # 注文管理 (:8081)
-│   └── openapi.yml
-├── payment-service/         # 決済管理 (:8083)
-│   └── openapi.yml
-├── compensation-service/    # 非同期補償処理 (:8084)
-│   └── openapi.yml
-├── orchestrator/            # Sagaオーケストレーター (:8080)
-│   └── openapi.yml
+├── kotlin/
+│   ├── common/                  # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
+│   │   └── openapi.yml          #   共通スキーマ (コード生成用)
+│   ├── order-service/           # 注文管理 (:8081)
+│   │   └── openapi.yml
+│   ├── payment-service/         # 決済管理 (:8083)
+│   │   └── openapi.yml
+│   ├── compensation-service/    # 非同期補償処理 (:8084)
+│   │   └── openapi.yml
+│   └── orchestrator/            # Sagaオーケストレーター (:8080)
+│       └── openapi.yml
 ├── docker-compose.yml       # PostgreSQL + LocalStack
 ├── postgres/                # DB初期化スクリプト (docker-entrypoint-initdb.d)
 ├── localstack/
@@ -262,9 +263,9 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 
 API仕様は各サービスモジュール直下に配置:
 
-- `order-service/openapi.yml`
-- `payment-service/openapi.yml`
-- `orchestrator/openapi.yml`
-- `compensation-service/openapi.yml`
+- `kotlin/order-service/openapi.yml`
+- `kotlin/payment-service/openapi.yml`
+- `kotlin/orchestrator/openapi.yml`
+- `kotlin/compensation-service/openapi.yml`
 
-共通スキーマ（コード生成用）: `common/openapi.yml`
+共通スキーマ（コード生成用）: `kotlin/common/openapi.yml`
