@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":orchestrator:orchestrator-domain"))
+    implementation(project(":order-service:domain"))
     implementation(project(":common"))
     implementation("org.springframework:spring-tx")
     implementation("org.springframework:spring-context")

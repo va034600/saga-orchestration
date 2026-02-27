@@ -8,7 +8,7 @@ openApiGenerate {
     generatorName.set("kotlin-spring")
     inputSpec.set("$projectDir/openapi.yml")
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
-    apiPackage.set("com.example.order.api")
+    apiPackage.set("com.example.orchestrator.api")
     modelPackage.set("com.example.common.dto")
     configOptions.set(
         mapOf(
@@ -32,7 +32,11 @@ openApiGenerate {
         mapOf(
             "OrderRequest" to "com.example.common.dto.OrderRequest",
             "OrderResponse" to "com.example.common.dto.OrderResponse",
+            "PaymentResponse" to "com.example.common.dto.PaymentResponse",
+            "SagaResult" to "com.example.common.dto.SagaResult",
             "ErrorResponse" to "com.example.common.dto.ErrorResponse",
+            "StartResult" to "com.example.orchestrator.application.AsyncSagaApplicationService.StartResult",
+            "ExecutionStatus" to "com.example.orchestrator.application.AsyncSagaApplicationService.ExecutionStatus",
         )
     )
 }
@@ -50,13 +54,17 @@ tasks.named("compileKotlin") {
 }
 
 dependencies {
-    implementation(project(":order-service:order-domain"))
-    implementation(project(":order-service:order-application"))
-    implementation(project(":order-service:order-infrastructure"))
+    implementation(project(":orchestrator:domain"))
+    implementation(project(":orchestrator:application"))
+    implementation(project(":orchestrator:infrastructure"))
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter")
+    implementation("software.amazon.awssdk:eventbridge")
+    implementation("software.amazon.awssdk:sfn")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springDocVersion")}")
     implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
     implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")

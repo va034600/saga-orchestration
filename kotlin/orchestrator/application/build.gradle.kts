@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":payment-service:payment-domain"))
+    implementation(project(":orchestrator:domain"))
     implementation(project(":common"))
     implementation("org.springframework:spring-tx")
     implementation("org.springframework:spring-context")

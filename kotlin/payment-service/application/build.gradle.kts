@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":compensation-service:compensation-domain"))
+    implementation(project(":payment-service:domain"))
     implementation(project(":common"))
     implementation("org.springframework:spring-tx")
     implementation("org.springframework:spring-context")

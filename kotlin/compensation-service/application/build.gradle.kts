@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":order-service:order-domain"))
+    implementation(project(":compensation-service:domain"))
     implementation(project(":common"))
     implementation("org.springframework:spring-tx")
     implementation("org.springframework:spring-context")

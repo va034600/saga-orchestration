@@ -50,9 +50,9 @@ tasks.named("compileKotlin") {
 }
 
 dependencies {
-    implementation(project(":payment-service:payment-domain"))
-    implementation(project(":payment-service:payment-application"))
-    implementation(project(":payment-service:payment-infrastructure"))
+    implementation(project(":payment-service:domain"))
+    implementation(project(":payment-service:application"))
+    implementation(project(":payment-service:infrastructure"))
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

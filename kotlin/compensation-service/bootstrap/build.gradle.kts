@@ -4,9 +4,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":compensation-service:compensation-domain"))
-    implementation(project(":compensation-service:compensation-application"))
-    implementation(project(":compensation-service:compensation-infrastructure"))
+    implementation(project(":compensation-service:domain"))
+    implementation(project(":compensation-service:application"))
+    implementation(project(":compensation-service:infrastructure"))
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
