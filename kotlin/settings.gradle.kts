@@ -17,7 +17,10 @@ rootProject.name = "saga-orchestration"
 
 include(
     "common",
-    "order-service",
+    "order-service:order-domain",
+    "order-service:order-application",
+    "order-service:order-infrastructure",
+    "order-service:order-bootstrap",
     "payment-service",
     "compensation-service",
     "orchestrator"
