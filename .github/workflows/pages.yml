@@ -1,0 +1,39 @@
+name: Deploy Swagger UI to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/**/openapi.yml'
+      - 'kotlin/compensation-service/bootstrap/openapi.yml'
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build site
+        run: |
+          mkdir -p _site/specs
+          cp docs/index.html _site/
+          cp services/orchestrator/openapi.yml _site/specs/orchestrator.yml
+          cp services/order-service/openapi.yml _site/specs/order-service.yml
+          cp services/payment-service/openapi.yml _site/specs/payment-service.yml
+          cp kotlin/compensation-service/bootstrap/openapi.yml _site/specs/compensation-service.yml
+      - uses: actions/upload-pages-artifact@v3
+      - id: deployment
+        uses: actions/deploy-pages@v4

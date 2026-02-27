@@ -349,12 +349,12 @@ API 定義は `services/` 配下に言語非依存リソースとして配置:
 
 共通スキーマ（コード生成用）: `services/common/openapi.yml`
 
-全サービスの API をまとめて閲覧できる Swagger UI を Docker Compose で提供:
+全サービスの API をまとめて閲覧できる Swagger UI を提供（ドロップダウンでサービスを切り替え）:
 
-```bash
-docker compose -f docker/docker-compose.yml up swagger-ui -d
-# → http://localhost:8090  （ドロップダウンでサービスを切り替え）
-```
+| 方法 | URL | 備考 |
+|------|-----|------|
+| GitHub Pages | https://va034600.github.io/saga-orchestration/ | main push 時に自動デプロイ |
+| Docker Compose | http://localhost:8090 | `docker compose -f docker/docker-compose.yml up swagger-ui -d` |
 
 各サービス単体の Swagger UI も利用可能（サービス起動後）:
 
