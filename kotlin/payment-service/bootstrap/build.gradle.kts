@@ -6,7 +6,7 @@ plugins {
 
 openApiGenerate {
     generatorName.set("kotlin-spring")
-    inputSpec.set("$projectDir/openapi.yml")
+    inputSpec.set("$rootDir/../services/payment-service/openapi.yml")
     outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
     apiPackage.set("com.example.payment.api")
     modelPackage.set("com.example.common.dto")
@@ -47,6 +47,12 @@ sourceSets {
 
 tasks.named("compileKotlin") {
     dependsOn("openApiGenerate")
+}
+
+tasks.processResources {
+    from("$rootDir/../services/payment-service") {
+        include("db/migration/**")
+    }
 }
 
 dependencies {

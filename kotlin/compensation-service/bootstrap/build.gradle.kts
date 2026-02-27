@@ -3,6 +3,12 @@ plugins {
     id("org.springframework.boot")
 }
 
+tasks.processResources {
+    from("$rootDir/../services/compensation-service") {
+        include("db/migration/**")
+    }
+}
+
 dependencies {
     implementation(project(":compensation-service:domain"))
     implementation(project(":compensation-service:application"))
