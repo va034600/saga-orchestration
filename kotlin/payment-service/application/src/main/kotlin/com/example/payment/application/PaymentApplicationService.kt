@@ -43,12 +43,12 @@ class PaymentApplicationService(
     fun capture(orderId: String): PaymentResponse {
         val payment = paymentRepository.findByOrderId(orderId)
             ?: throw PaymentFailedException(orderId, "No authorized payment found")
-        try {
+        val captured = try {
             payment.capture()
         } catch (e: InvalidPaymentStateException) {
             throw PaymentFailedException(orderId, "Payment is not in AUTHORIZED status: ${payment.status}")
         }
-        val saved = paymentRepository.save(payment)
+        val saved = paymentRepository.save(captured)
         log.info("Payment captured: {} for order: {}", saved.id.value, orderId)
         return toResponse(saved)
     }
@@ -57,12 +57,12 @@ class PaymentApplicationService(
     fun refund(orderId: String): PaymentResponse {
         val payment = paymentRepository.findByOrderId(orderId)
             ?: throw PaymentFailedException(orderId, "No payment found to refund")
-        try {
+        val refunded = try {
             payment.refund()
         } catch (e: InvalidPaymentStateException) {
             throw SagaException(e.message ?: "Invalid state transition", e)
         }
-        val saved = paymentRepository.save(payment)
+        val saved = paymentRepository.save(refunded)
         log.info("Payment refunded: {} for order: {}", saved.id.value, orderId)
         return toResponse(saved)
     }

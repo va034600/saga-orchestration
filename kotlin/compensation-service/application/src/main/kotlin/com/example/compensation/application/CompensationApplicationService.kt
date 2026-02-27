@@ -48,21 +48,21 @@ class CompensationApplicationService(
                 val event = objectMapper.readValue(task.payload, CompensationEvent::class.java)
                 compensationExecutor.execute(event)
 
-                task.markPublished()
-                outboxTaskRepository.save(task)
+                val published = task.markPublished()
+                outboxTaskRepository.save(published)
 
                 val compensation = compensationRepository.findById(task.compensationId)
                 if (compensation != null) {
-                    compensation.complete()
-                    compensationRepository.save(compensation)
+                    val completed = compensation.complete()
+                    compensationRepository.save(completed)
                 }
             } catch (ex: Exception) {
                 log.warn("Failed to process outbox task id={}: {}", task.id, ex.message)
 
                 val compensation = compensationRepository.findById(task.compensationId)
                 if (compensation != null) {
-                    compensation.fail(ex.message ?: "Unknown error")
-                    compensationRepository.save(compensation)
+                    val failed = compensation.fail(ex.message ?: "Unknown error")
+                    compensationRepository.save(failed)
                 }
                 break
             }

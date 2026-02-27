@@ -9,39 +9,54 @@ class Compensation private constructor(
     val id: Long?,
     val orderId: String,
     val compensationType: CompensationType,
-    status: CompensationStatus,
-    errorMessage: String?,
+    val status: CompensationStatus,
+    val errorMessage: String?,
     val createdAt: Instant,
-    completedAt: Instant?,
+    val completedAt: Instant?,
 ) {
-    var status: CompensationStatus = status
-        private set
-
-    var errorMessage: String? = errorMessage
-        private set
-
-    var completedAt: Instant? = completedAt
-        private set
-
-    fun startProcessing() {
-        transitTo(CompensationStatus.PROCESSING)
-    }
-
-    fun complete() {
-        transitTo(CompensationStatus.COMPLETED)
-        completedAt = Instant.now()
-    }
-
-    fun fail(message: String) {
-        transitTo(CompensationStatus.FAILED)
-        errorMessage = message
-    }
-
-    private fun transitTo(target: CompensationStatus) {
-        if (!status.canTransitionTo(target)) {
-            throw InvalidCompensationStateException(status, target)
+    fun startProcessing(): Compensation {
+        if (!status.canTransitionTo(CompensationStatus.PROCESSING)) {
+            throw InvalidCompensationStateException(status, CompensationStatus.PROCESSING)
         }
-        status = target
+        return Compensation(
+            id = id,
+            orderId = orderId,
+            compensationType = compensationType,
+            status = CompensationStatus.PROCESSING,
+            errorMessage = errorMessage,
+            createdAt = createdAt,
+            completedAt = completedAt,
+        )
+    }
+
+    fun complete(): Compensation {
+        if (!status.canTransitionTo(CompensationStatus.COMPLETED)) {
+            throw InvalidCompensationStateException(status, CompensationStatus.COMPLETED)
+        }
+        return Compensation(
+            id = id,
+            orderId = orderId,
+            compensationType = compensationType,
+            status = CompensationStatus.COMPLETED,
+            errorMessage = errorMessage,
+            createdAt = createdAt,
+            completedAt = Instant.now(),
+        )
+    }
+
+    fun fail(message: String): Compensation {
+        if (!status.canTransitionTo(CompensationStatus.FAILED)) {
+            throw InvalidCompensationStateException(status, CompensationStatus.FAILED)
+        }
+        return Compensation(
+            id = id,
+            orderId = orderId,
+            compensationType = compensationType,
+            status = CompensationStatus.FAILED,
+            errorMessage = message,
+            createdAt = createdAt,
+            completedAt = completedAt,
+        )
     }
 
     companion object {

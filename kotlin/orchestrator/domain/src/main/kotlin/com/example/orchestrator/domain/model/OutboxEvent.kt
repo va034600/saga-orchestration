@@ -7,20 +7,19 @@ class OutboxEvent private constructor(
     val orderId: String,
     val eventType: String,
     val payload: String,
-    published: Boolean,
+    val published: Boolean,
     val createdAt: Instant,
-    publishedAt: Instant?,
+    val publishedAt: Instant?,
 ) {
-    var published: Boolean = published
-        private set
-
-    var publishedAt: Instant? = publishedAt
-        private set
-
-    fun markPublished() {
-        published = true
-        publishedAt = Instant.now()
-    }
+    fun markPublished(): OutboxEvent = OutboxEvent(
+        id = id,
+        orderId = orderId,
+        eventType = eventType,
+        payload = payload,
+        published = true,
+        createdAt = createdAt,
+        publishedAt = Instant.now(),
+    )
 
     companion object {
         fun create(

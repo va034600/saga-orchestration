@@ -10,30 +10,38 @@ class Order private constructor(
     val productId: String,
     val quantity: Int,
     val amount: Money,
-    status: OrderStatus,
+    val status: OrderStatus,
     val createdAt: Instant,
-    updatedAt: Instant,
+    val updatedAt: Instant,
 ) {
-    var status: OrderStatus = status
-        private set
-
-    var updatedAt: Instant = updatedAt
-        private set
-
-    fun complete() {
-        transitTo(OrderStatus.COMPLETED)
-    }
-
-    fun cancel() {
-        transitTo(OrderStatus.CANCELLED)
-    }
-
-    private fun transitTo(target: OrderStatus) {
-        if (!status.canTransitionTo(target)) {
-            throw InvalidOrderStateException(status, target)
+    fun complete(): Order {
+        if (!status.canTransitionTo(OrderStatus.COMPLETED)) {
+            throw InvalidOrderStateException(status, OrderStatus.COMPLETED)
         }
-        status = target
-        updatedAt = Instant.now()
+        return Order(
+            id = id,
+            productId = productId,
+            quantity = quantity,
+            amount = amount,
+            status = OrderStatus.COMPLETED,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
+    }
+
+    fun cancel(): Order {
+        if (!status.canTransitionTo(OrderStatus.CANCELLED)) {
+            throw InvalidOrderStateException(status, OrderStatus.CANCELLED)
+        }
+        return Order(
+            id = id,
+            productId = productId,
+            quantity = quantity,
+            amount = amount,
+            status = OrderStatus.CANCELLED,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
     }
 
     companion object {

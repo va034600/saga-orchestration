@@ -25,8 +25,8 @@ class OutboxPublisher(
             try {
                 val compensationEvent = objectMapper.readValue(event.payload, CompensationEvent::class.java)
                 compensationEventPublisher.publishCompensation(compensationEvent)
-                event.markPublished()
-                outboxEventRepository.save(event)
+                val published = event.markPublished()
+                outboxEventRepository.save(published)
             } catch (ex: Exception) {
                 log.warn("Failed to publish outbox event id={}: {}", event.id, ex.message)
                 break

@@ -1,45 +1,62 @@
 package com.example.orchestrator.domain.model
 
 import com.example.orchestrator.domain.SagaStatus
+import com.example.orchestrator.domain.StepStatus
 import java.time.Instant
 
 class SagaState private constructor(
     val orderId: String,
-    status: SagaStatus,
-    currentStep: String?,
-    val steps: MutableList<SagaStep>,
+    val status: SagaStatus,
+    val currentStep: String?,
+    val steps: List<SagaStep>,
     val createdAt: Instant,
-    updatedAt: Instant,
+    val updatedAt: Instant,
 ) {
-    var status: SagaStatus = status
-        private set
-
-    var currentStep: String? = currentStep
-        private set
-
-    var updatedAt: Instant = updatedAt
-        private set
-
-    fun addStep(stepName: String): SagaStep {
+    fun addStep(stepName: String): SagaState {
         val step = SagaStep.create(stepName)
-        steps.add(step)
-        currentStep = stepName
-        updatedAt = Instant.now()
-        return step
+        return SagaState(
+            orderId = orderId,
+            status = status,
+            currentStep = stepName,
+            steps = steps + step,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
     }
 
-    fun markCompleted() {
-        status = SagaStatus.COMPLETED
-        updatedAt = Instant.now()
+    fun completeCurrentStep(): SagaState {
+        val lastStep = steps.last()
+        val completedStep = lastStep.complete()
+        return SagaState(
+            orderId = orderId,
+            status = status,
+            currentStep = currentStep,
+            steps = steps.dropLast(1) + completedStep,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
     }
 
-    fun markFailed() {
-        status = SagaStatus.FAILED
-        updatedAt = Instant.now()
-    }
+    fun markCompleted(): SagaState = SagaState(
+        orderId = orderId,
+        status = SagaStatus.COMPLETED,
+        currentStep = currentStep,
+        steps = steps,
+        createdAt = createdAt,
+        updatedAt = Instant.now(),
+    )
+
+    fun markFailed(): SagaState = SagaState(
+        orderId = orderId,
+        status = SagaStatus.FAILED,
+        currentStep = currentStep,
+        steps = steps,
+        createdAt = createdAt,
+        updatedAt = Instant.now(),
+    )
 
     fun completedStepNames(): List<String> =
-        steps.filter { it.status == com.example.orchestrator.domain.StepStatus.COMPLETED }
+        steps.filter { it.status == StepStatus.COMPLETED }
             .map { it.stepName }
 
     companion object {
@@ -49,7 +66,7 @@ class SagaState private constructor(
                 orderId = orderId,
                 status = SagaStatus.STARTED,
                 currentStep = null,
-                steps = mutableListOf(),
+                steps = emptyList(),
                 createdAt = now,
                 updatedAt = now,
             )
@@ -59,7 +76,7 @@ class SagaState private constructor(
             orderId: String,
             status: SagaStatus,
             currentStep: String?,
-            steps: MutableList<SagaStep>,
+            steps: List<SagaStep>,
             createdAt: Instant,
             updatedAt: Instant,
         ): SagaState = SagaState(

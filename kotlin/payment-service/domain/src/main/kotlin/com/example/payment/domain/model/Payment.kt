@@ -9,30 +9,36 @@ class Payment private constructor(
     val id: PaymentId,
     val orderId: String,
     val amount: Money,
-    status: PaymentStatus,
+    val status: PaymentStatus,
     val createdAt: Instant,
-    updatedAt: Instant,
+    val updatedAt: Instant,
 ) {
-    var status: PaymentStatus = status
-        private set
-
-    var updatedAt: Instant = updatedAt
-        private set
-
-    fun capture() {
-        transitTo(PaymentStatus.CAPTURED)
-    }
-
-    fun refund() {
-        transitTo(PaymentStatus.REFUNDED)
-    }
-
-    private fun transitTo(target: PaymentStatus) {
-        if (!status.canTransitionTo(target)) {
-            throw InvalidPaymentStateException(status, target)
+    fun capture(): Payment {
+        if (!status.canTransitionTo(PaymentStatus.CAPTURED)) {
+            throw InvalidPaymentStateException(status, PaymentStatus.CAPTURED)
         }
-        status = target
-        updatedAt = Instant.now()
+        return Payment(
+            id = id,
+            orderId = orderId,
+            amount = amount,
+            status = PaymentStatus.CAPTURED,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
+    }
+
+    fun refund(): Payment {
+        if (!status.canTransitionTo(PaymentStatus.REFUNDED)) {
+            throw InvalidPaymentStateException(status, PaymentStatus.REFUNDED)
+        }
+        return Payment(
+            id = id,
+            orderId = orderId,
+            amount = amount,
+            status = PaymentStatus.REFUNDED,
+            createdAt = createdAt,
+            updatedAt = Instant.now(),
+        )
     }
 
     companion object {

@@ -8,20 +8,20 @@ class OutboxTask private constructor(
     val orderId: String,
     val taskType: String,
     val payload: String,
-    published: Boolean,
+    val published: Boolean,
     val createdAt: Instant,
-    publishedAt: Instant?,
+    val publishedAt: Instant?,
 ) {
-    var published: Boolean = published
-        private set
-
-    var publishedAt: Instant? = publishedAt
-        private set
-
-    fun markPublished() {
-        published = true
-        publishedAt = Instant.now()
-    }
+    fun markPublished(): OutboxTask = OutboxTask(
+        id = id,
+        compensationId = compensationId,
+        orderId = orderId,
+        taskType = taskType,
+        payload = payload,
+        published = true,
+        createdAt = createdAt,
+        publishedAt = Instant.now(),
+    )
 
     companion object {
         fun create(

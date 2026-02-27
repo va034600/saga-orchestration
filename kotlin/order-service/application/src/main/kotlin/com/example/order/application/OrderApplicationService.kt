@@ -43,12 +43,12 @@ class OrderApplicationService(
     @Transactional
     fun completeOrder(orderId: String): OrderResponse {
         val order = findOrThrow(orderId)
-        try {
+        val completed = try {
             order.complete()
         } catch (e: InvalidOrderStateException) {
             throw SagaException(e.message ?: "Invalid state transition", e)
         }
-        val saved = orderRepository.save(order)
+        val saved = orderRepository.save(completed)
         log.info("Order completed: {}", orderId)
         return toResponse(saved)
     }
@@ -56,12 +56,12 @@ class OrderApplicationService(
     @Transactional
     fun cancelOrder(orderId: String): OrderResponse {
         val order = findOrThrow(orderId)
-        try {
+        val cancelled = try {
             order.cancel()
         } catch (e: InvalidOrderStateException) {
             throw SagaException(e.message ?: "Invalid state transition", e)
         }
-        val saved = orderRepository.save(order)
+        val saved = orderRepository.save(cancelled)
         log.info("Order cancelled: {}", orderId)
         return toResponse(saved)
     }

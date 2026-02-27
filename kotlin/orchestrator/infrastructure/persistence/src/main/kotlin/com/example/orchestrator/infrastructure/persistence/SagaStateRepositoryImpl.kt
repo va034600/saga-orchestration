@@ -29,7 +29,7 @@ class SagaStateRepositoryImpl(
                 errorMessage = step.errorMessage,
                 executedAt = step.executedAt,
             )
-        }.toMutableList(),
+        }.toList(),
         createdAt = entity.createdAt,
         updatedAt = entity.updatedAt,
     )

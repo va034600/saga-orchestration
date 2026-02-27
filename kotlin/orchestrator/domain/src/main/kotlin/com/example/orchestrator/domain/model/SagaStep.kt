@@ -6,17 +6,17 @@ import java.time.Instant
 class SagaStep(
     val id: Long?,
     val stepName: String,
-    status: StepStatus,
-    var errorMessage: String?,
-    var executedAt: Instant?,
+    val status: StepStatus,
+    val errorMessage: String?,
+    val executedAt: Instant?,
 ) {
-    var status: StepStatus = status
-        private set
-
-    fun complete() {
-        status = StepStatus.COMPLETED
-        executedAt = Instant.now()
-    }
+    fun complete(): SagaStep = SagaStep(
+        id = id,
+        stepName = stepName,
+        status = StepStatus.COMPLETED,
+        errorMessage = errorMessage,
+        executedAt = Instant.now(),
+    )
 
     companion object {
         fun create(stepName: String): SagaStep = SagaStep(
