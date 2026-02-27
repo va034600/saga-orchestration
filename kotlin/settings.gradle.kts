@@ -17,8 +17,29 @@ rootProject.name = "saga-orchestration"
 
 include(
     "common",
-    "order-service",
-    "payment-service",
-    "compensation-service",
-    "orchestrator"
+    // order-service
+    "order-service:domain",
+    "order-service:application",
+    "order-service:infrastructure:persistence",
+    "order-service:bootstrap",
+    // payment-service
+    "payment-service:domain",
+    "payment-service:application",
+    "payment-service:infrastructure:persistence",
+    "payment-service:bootstrap",
+    // compensation-service
+    "compensation-service:domain",
+    "compensation-service:application",
+    "compensation-service:infrastructure:persistence",
+    "compensation-service:infrastructure:messaging",
+    "compensation-service:infrastructure:http",
+    "compensation-service:bootstrap",
+    // orchestrator
+    "orchestrator:domain",
+    "orchestrator:application",
+    "orchestrator:infrastructure:persistence",
+    "orchestrator:infrastructure:http",
+    "orchestrator:infrastructure:messaging",
+    "orchestrator:infrastructure:aws",
+    "orchestrator:bootstrap",
 )

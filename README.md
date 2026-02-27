@@ -83,19 +83,51 @@ saga-orchestration/
 │   ├── common/                      # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
 │   │   └── openapi.yml              #   共通スキーマ (コード生成用)
 │   ├── order-service/               # 注文管理 (:8081)
-│   │   └── openapi.yml
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   │   └── persistence/         # JPA エンティティ + リポジトリ実装
+│   │   └── bootstrap/
 │   ├── payment-service/             # 決済管理 (:8083)
-│   │   └── openapi.yml
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   │   └── persistence/         # JPA エンティティ + リポジトリ実装
+│   │   └── bootstrap/
 │   ├── compensation-service/        # 非同期補償処理 (:8084)
-│   │   └── openapi.yml
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   │   ├── persistence/         # JPA エンティティ + リポジトリ実装
+│   │   │   ├── messaging/           # SQS リスナー
+│   │   │   └── http/                # REST クライアント + Config
+│   │   └── bootstrap/
 │   └── orchestrator/                # Sagaオーケストレーター (:8080)
-│       └── openapi.yml
+│       ├── domain/
+│       ├── application/
+│       ├── infrastructure/
+│       │   ├── persistence/         # JPA エンティティ + リポジトリ実装
+│       │   ├── http/                # WebClient ベースの HTTP クライアント
+│       │   ├── messaging/           # EventBridge パブリッシャー
+│       │   └── aws/                 # Step Functions クライアント
+│       └── bootstrap/
 └── docker/
     ├── docker-compose.yml           # PostgreSQL + LocalStack
     ├── postgres/                    # DB初期化スクリプト (docker-entrypoint-initdb.d)
     └── localstack/
         ├── init-aws.sh              # LocalStack起動時に自動実行
         └── state-machine.json       # Step Functions ステートマシン定義
+```
+
+`infrastructure` モジュールは技術関心ごとにサブモジュール化されており、不要な依存の混入をコンパイル時に防止する（例: persistence モジュールに messaging 依存が入らない）。
+
+```
+bootstrap → infrastructure:persistence  → domain           (+ JPA)
+          → infrastructure:http         → application      (+ Web/WebFlux)
+          → infrastructure:messaging    → application      (+ SQS/EventBridge)
+          → infrastructure:aws          → application      (+ SFN SDK)
+          → application → domain
+          → common
 ```
 
 ## 各サービスの責務
@@ -210,10 +242,10 @@ cd kotlin
 
 ```bash
 cd kotlin
-./gradlew :orchestrator:bootRun
-./gradlew :order-service:bootRun
-./gradlew :payment-service:bootRun
-./gradlew :compensation-service:bootRun
+./gradlew :orchestrator:bootstrap:bootRun
+./gradlew :order-service:bootstrap:bootRun
+./gradlew :payment-service:bootstrap:bootRun
+./gradlew :compensation-service:bootstrap:bootRun
 ```
 
 ## 動作確認
