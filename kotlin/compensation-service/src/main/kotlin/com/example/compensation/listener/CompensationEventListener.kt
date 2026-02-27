@@ -4,22 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.example.common.dto.CompensationEvent
 import com.example.common.dto.CompensationStatus
 import com.example.compensation.entity.Compensation
-import com.example.compensation.executor.CompensationExecutor
+import com.example.compensation.entity.OutboxTask
 import com.example.compensation.repository.CompensationRepository
+import com.example.compensation.repository.OutboxTaskRepository
 import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Instant
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class CompensationEventListener(
-    private val compensationExecutor: CompensationExecutor,
     private val compensationRepository: CompensationRepository,
+    private val outboxTaskRepository: OutboxTaskRepository,
     private val objectMapper: ObjectMapper
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @SqsListener("compensation-queue")
+    @Transactional
     fun onCompensationEvent(message: String) {
         log.info("Received compensation event: {}", message)
 
@@ -31,16 +33,11 @@ class CompensationEventListener(
         )
         compensationRepository.save(compensation)
 
-        try {
-            compensationExecutor.execute(event)
-            compensation.status = CompensationStatus.COMPLETED
-            compensation.completedAt = Instant.now()
-        } catch (ex: Exception) {
-            log.error("Compensation failed for order {}: {}", event.orderId, ex.message)
-            compensation.status = CompensationStatus.FAILED
-            compensation.errorMessage = ex.message
-        }
-
-        compensationRepository.save(compensation)
+        outboxTaskRepository.save(OutboxTask(
+            compensationId = compensation.compId!!,
+            orderId = event.orderId,
+            taskType = event.compensationType.name,
+            payload = objectMapper.writeValueAsString(event)
+        ))
     }
 }

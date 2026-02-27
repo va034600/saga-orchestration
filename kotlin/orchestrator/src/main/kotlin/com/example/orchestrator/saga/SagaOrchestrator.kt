@@ -8,8 +8,10 @@ import com.example.common.dto.CompensationType
 import com.example.orchestrator.client.ServiceClients
 import com.example.orchestrator.entity.SagaState
 import com.example.orchestrator.entity.SagaStep
-import com.example.orchestrator.publisher.EventBridgePublisher
+import com.example.orchestrator.entity.OutboxEvent
+import com.example.orchestrator.repository.OutboxEventRepository
 import com.example.orchestrator.repository.SagaStateRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +20,8 @@ import java.time.Instant
 @Service
 class SagaOrchestrator(
     private val serviceClients: ServiceClients,
-    private val eventBridgePublisher: EventBridgePublisher,
+    private val outboxEventRepository: OutboxEventRepository,
+    private val objectMapper: ObjectMapper,
     private val sagaStateRepository: SagaStateRepository
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -80,14 +83,20 @@ class SagaOrchestrator(
             .map { it.stepName }
 
         if ("EXECUTE_PAYMENT" in completedSteps) {
-            eventBridgePublisher.publishCompensation(
-                CompensationEvent(orderId = request.orderId, compensationType = CompensationType.REFUND_PAYMENT)
-            )
+            val event = CompensationEvent(orderId = request.orderId, compensationType = CompensationType.REFUND_PAYMENT)
+            outboxEventRepository.save(OutboxEvent(
+                orderId = request.orderId,
+                eventType = "CompensationRequested",
+                payload = objectMapper.writeValueAsString(event)
+            ))
         }
         if ("CREATE_ORDER" in completedSteps) {
-            eventBridgePublisher.publishCompensation(
-                CompensationEvent(orderId = request.orderId, compensationType = CompensationType.CANCEL_ORDER)
-            )
+            val event = CompensationEvent(orderId = request.orderId, compensationType = CompensationType.CANCEL_ORDER)
+            outboxEventRepository.save(OutboxEvent(
+                orderId = request.orderId,
+                eventType = "CompensationRequested",
+                payload = objectMapper.writeValueAsString(event)
+            ))
         }
     }
 
