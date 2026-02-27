@@ -53,6 +53,10 @@ tasks.processResources {
     from("$rootDir/../services/payment-service") {
         include("db/migration/**")
     }
+    from("$rootDir/../services/payment-service") {
+        include("openapi.yml")
+        into("static")
+    }
 }
 
 dependencies {

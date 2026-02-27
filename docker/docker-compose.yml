@@ -21,6 +21,25 @@ services:
       timeout: 5s
       retries: 5
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    ports:
+      - "8090:8080"
+    volumes:
+      - ../services/orchestrator/openapi.yml:/usr/share/nginx/html/specs/orchestrator.yml:ro
+      - ../services/order-service/openapi.yml:/usr/share/nginx/html/specs/order-service.yml:ro
+      - ../services/payment-service/openapi.yml:/usr/share/nginx/html/specs/payment-service.yml:ro
+      - ../kotlin/compensation-service/bootstrap/openapi.yml:/usr/share/nginx/html/specs/compensation-service.yml:ro
+    environment:
+      URLS: >-
+        [
+          {"url":"/specs/orchestrator.yml","name":"Orchestrator (:8080)"},
+          {"url":"/specs/order-service.yml","name":"Order Service (:8081)"},
+          {"url":"/specs/payment-service.yml","name":"Payment Service (:8083)"},
+          {"url":"/specs/compensation-service.yml","name":"Compensation Service (:8084)"}
+        ]
+
   localstack:
     image: localstack/localstack:4.13
     container_name: localstack

@@ -339,7 +339,7 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 | orchestrator | `saga_states`, `saga_steps`, `outbox_events`, `idempotency_keys` |
 | compensation-service | `compensations`, `outbox_tasks` |
 
-## OpenAPI
+## OpenAPI / Swagger UI
 
 API 定義は `services/` 配下に言語非依存リソースとして配置:
 
@@ -348,3 +348,19 @@ API 定義は `services/` 配下に言語非依存リソースとして配置:
 - `services/orchestrator/openapi.yml`
 
 共通スキーマ（コード生成用）: `services/common/openapi.yml`
+
+全サービスの API をまとめて閲覧できる Swagger UI を Docker Compose で提供:
+
+```bash
+docker compose -f docker/docker-compose.yml up swagger-ui -d
+# → http://localhost:8090  （ドロップダウンでサービスを切り替え）
+```
+
+各サービス単体の Swagger UI も利用可能（サービス起動後）:
+
+| サービス | Swagger UI |
+|---------|-----------|
+| orchestrator | http://localhost:8080/swagger-ui.html |
+| order-service | http://localhost:8081/swagger-ui.html |
+| payment-service | http://localhost:8083/swagger-ui.html |
+| compensation-service | http://localhost:8084/swagger-ui.html |

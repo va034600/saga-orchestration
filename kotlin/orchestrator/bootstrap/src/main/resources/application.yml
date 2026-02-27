@@ -32,6 +32,10 @@ aws:
   stepfunctions:
     state-machine-arn: arn:aws:states:ap-northeast-1:000000000000:stateMachine:order-saga
 
+springdoc:
+  swagger-ui:
+    url: /openapi.yml
+
 management:
   endpoints:
     web:

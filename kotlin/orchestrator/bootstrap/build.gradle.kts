@@ -57,6 +57,10 @@ tasks.processResources {
     from("$rootDir/../services/orchestrator") {
         include("db/migration/**")
     }
+    from("$rootDir/../services/orchestrator") {
+        include("openapi.yml")
+        into("static")
+    }
 }
 
 dependencies {

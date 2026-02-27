@@ -29,6 +29,10 @@ services:
   payment:
     url: http://localhost:8083
 
+springdoc:
+  swagger-ui:
+    url: /openapi.yml
+
 management:
   endpoints:
     web:

@@ -142,7 +142,6 @@ components:
       description: Unique key to ensure idempotent processing of the request
       schema:
         type: string
-        format: uuid
 
     XTraceId:
       name: X-Trace-Id
