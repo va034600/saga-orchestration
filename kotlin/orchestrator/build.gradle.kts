@@ -35,8 +35,8 @@ openApiGenerate {
             "PaymentResponse" to "com.example.common.dto.PaymentResponse",
             "SagaResult" to "com.example.common.dto.SagaResult",
             "ErrorResponse" to "com.example.common.dto.ErrorResponse",
-            "StartResult" to "com.example.orchestrator.saga.AsyncSagaOrchestrator.StartResult",
-            "ExecutionStatus" to "com.example.orchestrator.saga.AsyncSagaOrchestrator.ExecutionStatus",
+            "StartResult" to "com.example.orchestrator.application.AsyncSagaApplicationService.StartResult",
+            "ExecutionStatus" to "com.example.orchestrator.application.AsyncSagaApplicationService.ExecutionStatus",
         )
     )
 }

@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication(scanBasePackages = ["com.example.orchestrator", "com.example.common"])
-@EntityScan(basePackages = ["com.example.orchestrator.entity", "com.example.common.idempotency"])
-@EnableJpaRepositories(basePackages = ["com.example.orchestrator.repository", "com.example.common.idempotency"])
+@EntityScan(basePackages = ["com.example.orchestrator.infrastructure.persistence", "com.example.common.idempotency"])
+@EnableJpaRepositories(basePackages = ["com.example.orchestrator.infrastructure.persistence", "com.example.common.idempotency"])
 @EnableScheduling
 class OrchestratorApplication
 

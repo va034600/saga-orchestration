@@ -6,8 +6,8 @@ import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 @SpringBootApplication(scanBasePackages = ["com.example.payment", "com.example.common"])
-@EntityScan(basePackages = ["com.example.payment.entity", "com.example.common.idempotency"])
-@EnableJpaRepositories(basePackages = ["com.example.payment.repository", "com.example.common.idempotency"])
+@EntityScan(basePackages = ["com.example.payment.infrastructure.persistence", "com.example.common.idempotency"])
+@EnableJpaRepositories(basePackages = ["com.example.payment.infrastructure.persistence", "com.example.common.idempotency"])
 class PaymentServiceApplication
 
 fun main(args: Array<String>) {
