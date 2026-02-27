@@ -52,7 +52,7 @@ tasks.named("compileKotlin") {
 dependencies {
     implementation(project(":order-service:domain"))
     implementation(project(":order-service:application"))
-    implementation(project(":order-service:infrastructure"))
+    implementation(project(":order-service:infrastructure:persistence"))
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

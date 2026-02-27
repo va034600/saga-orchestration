@@ -56,7 +56,10 @@ tasks.named("compileKotlin") {
 dependencies {
     implementation(project(":orchestrator:domain"))
     implementation(project(":orchestrator:application"))
-    implementation(project(":orchestrator:infrastructure"))
+    implementation(project(":orchestrator:infrastructure:persistence"))
+    implementation(project(":orchestrator:infrastructure:http"))
+    implementation(project(":orchestrator:infrastructure:messaging"))
+    implementation(project(":orchestrator:infrastructure:aws"))
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
