@@ -28,6 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Sync specs
         run: |
+          mkdir -p docs/specs
           cp services/orchestrator/openapi.yml docs/specs/orchestrator.yml
           cp services/order-service/openapi.yml docs/specs/order-service.yml
           cp services/payment-service/openapi.yml docs/specs/payment-service.yml
