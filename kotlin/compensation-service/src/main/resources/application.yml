@@ -1,0 +1,36 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: compensation-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/compensation_db
+    username: saga
+    password: saga
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      region:
+        static: ap-northeast-1
+      credentials:
+        access-key: test
+        secret-key: test
+
+services:
+  order:
+    url: http://localhost:8081
+  payment:
+    url: http://localhost:8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

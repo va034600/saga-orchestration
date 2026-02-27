@@ -1,0 +1,149 @@
+openapi: 3.0.3
+info:
+  title: Saga Orchestration Common Models
+  description: Shared DTO and Enum definitions for code generation
+  version: 1.0.0
+
+paths: {}
+
+components:
+  schemas:
+    # ── Enums ──────────────────────────────────────────────
+
+    OrderStatus:
+      type: string
+      enum:
+        - PENDING
+        - COMPLETED
+        - CANCELLED
+
+    PaymentStatus:
+      type: string
+      enum:
+        - AUTHORIZED
+        - CAPTURED
+        - REFUNDED
+        - FAILED
+
+    CompensationType:
+      type: string
+      enum:
+        - REFUND_PAYMENT
+        - CANCEL_ORDER
+
+    CompensationStatus:
+      type: string
+      enum:
+        - PENDING
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+
+    # ── DTOs ───────────────────────────────────────────────
+
+    OrderRequest:
+      type: object
+      required:
+        - orderId
+        - productId
+        - quantity
+        - amount
+      properties:
+        orderId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        amount:
+          type: number
+
+    OrderResponse:
+      type: object
+      required:
+        - orderId
+        - status
+      properties:
+        orderId:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+
+    PaymentRequest:
+      type: object
+      required:
+        - orderId
+        - amount
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+
+    PaymentResponse:
+      type: object
+      required:
+        - paymentId
+        - orderId
+        - status
+        - success
+      properties:
+        paymentId:
+          type: string
+        orderId:
+          type: string
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        success:
+          type: boolean
+
+    SagaResult:
+      type: object
+      required:
+        - orderId
+        - success
+        - message
+      properties:
+        orderId:
+          type: string
+        success:
+          type: boolean
+        message:
+          type: string
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        payment:
+          $ref: '#/components/schemas/PaymentResponse'
+
+    CompensationEvent:
+      type: object
+      required:
+        - orderId
+        - compensationType
+      properties:
+        orderId:
+          type: string
+        compensationType:
+          $ref: '#/components/schemas/CompensationType'
+        paymentId:
+          type: string
+        amount:
+          type: number
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string

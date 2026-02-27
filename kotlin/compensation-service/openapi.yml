@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Compensation Service API
+  description: Handles compensation events via SQS for saga rollback operations. Exposes a health check endpoint; compensation processing is triggered internally through SQS message consumption.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084
+    description: Local development server
+
+paths:
+  /actuator/health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      description: Returns the health status of the compensation service, including SQS listener connectivity.
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: DOWN
+
+components:
+  parameters:
+    XTraceId:
+      name: X-Trace-Id
+      in: header
+      required: false
+      description: Distributed tracing identifier for request correlation
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CompensationEvent:
+      type: object
+      description: Event consumed from SQS to trigger compensation actions. This schema is not exposed via HTTP endpoints but documents the internal message contract.
+      properties:
+        orderId:
+          type: string
+          description: Identifier of the order requiring compensation
+        compensationType:
+          type: string
+          description: Type of compensation to perform
+        paymentId:
+          type: string
+          description: Identifier of the payment involved in the compensation
+        amount:
+          type: number
+          format: double
+          description: Monetary amount involved in the compensation
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        error:
+          type: string
+          description: Short error description
+        message:
+          type: string
+          description: Detailed error message

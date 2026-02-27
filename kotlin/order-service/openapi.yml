@@ -1,0 +1,237 @@
+openapi: 3.0.3
+info:
+  title: Order Service API
+  description: Manages order lifecycle within the saga orchestration pattern.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+    description: Local development server
+
+tags:
+  - name: Order
+
+paths:
+  /api/orders:
+    post:
+      tags: [Order]
+      summary: Create order
+      operationId: createOrder
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/orders/{orderId}:
+    get:
+      tags: [Order]
+      summary: Get order
+      operationId: getOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/orders/{orderId}/complete:
+    put:
+      tags: [Order]
+      summary: Complete order
+      operationId: completeOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Order completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/orders/{orderId}/cancel:
+    put:
+      tags: [Order]
+      summary: Cancel order
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Order cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      description: Unique identifier of the order
+      schema:
+        type: string
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Unique key to ensure idempotent processing of the request
+      schema:
+        type: string
+        format: uuid
+
+    XTraceId:
+      name: X-Trace-Id
+      in: header
+      required: false
+      description: Distributed tracing identifier for request correlation
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    OrderRequest:
+      type: object
+      required:
+        - orderId
+        - productId
+        - quantity
+        - amount
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier for the order
+        productId:
+          type: string
+          description: Identifier of the product being ordered
+        quantity:
+          type: integer
+          format: int32
+          description: Number of units to order
+          minimum: 1
+        amount:
+          type: number
+          format: double
+          description: Total monetary amount for the order
+          minimum: 0
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier of the order
+        status:
+          type: string
+          description: Current status of the order
+          enum:
+            - PENDING
+            - COMPLETED
+            - CANCELLED
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        error:
+          type: string
+          description: Short error description
+        message:
+          type: string
+          description: Detailed error message

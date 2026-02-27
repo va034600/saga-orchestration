@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: Manages payment authorization, capture, and refund operations within the saga orchestration pattern.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8083
+    description: Local development server
+
+tags:
+  - name: Payment
+
+paths:
+  /api/payments/authorize:
+    post:
+      tags: [Payment]
+      summary: Authorize payment
+      operationId: authorizePayment
+      description: Authorizes a payment for the specified order and amount.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment authorized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/payments/{orderId}/capture:
+    put:
+      tags: [Payment]
+      summary: Capture payment
+      operationId: capturePayment
+      description: Captures a previously authorized payment for the specified order.
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Payment captured successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          description: Payment not found for the specified order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/payments/{orderId}/refund:
+    put:
+      tags: [Payment]
+      summary: Refund payment
+      operationId: refundPayment
+      description: Refunds a previously captured or authorized payment for the specified order.
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Payment refunded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          description: Payment not found for the specified order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      description: Unique identifier of the order associated with the payment
+      schema:
+        type: string
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Unique key to ensure idempotent processing of the request
+      schema:
+        type: string
+        format: uuid
+
+    XTraceId:
+      name: X-Trace-Id
+      in: header
+      required: false
+      description: Distributed tracing identifier for request correlation
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    PaymentRequest:
+      type: object
+      required:
+        - orderId
+        - amount
+      properties:
+        orderId:
+          type: string
+          description: Identifier of the associated order
+        amount:
+          type: number
+          format: double
+          description: Monetary amount to authorize
+          minimum: 0
+
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+          description: Unique identifier of the payment
+        orderId:
+          type: string
+          description: Identifier of the associated order
+        status:
+          type: string
+          description: Current status of the payment
+          enum:
+            - AUTHORIZED
+            - CAPTURED
+            - REFUNDED
+            - FAILED
+        success:
+          type: boolean
+          description: Whether the payment operation was successful
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        error:
+          type: string
+          description: Short error description
+        message:
+          type: string
+          description: Detailed error message

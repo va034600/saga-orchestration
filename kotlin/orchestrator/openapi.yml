@@ -1,0 +1,326 @@
+openapi: 3.0.3
+info:
+  title: Saga Orchestrator API
+  description: Orchestrates the order saga across order, inventory, and payment services with compensation support.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Saga
+
+paths:
+  /api/saga/orders:
+    post:
+      tags: [Saga]
+      summary: Execute order saga
+      operationId: executeOrderSaga
+      description: Initiates and orchestrates the complete order saga including order creation, inventory reservation, and payment authorization.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '200':
+          description: Saga executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SagaResult'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/saga/states/{orderId}:
+    get:
+      tags: [Saga]
+      summary: Get saga state
+      operationId: getSagaState
+      description: Retrieves the current state of a saga for the specified order.
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Saga state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SagaResult'
+        '404':
+          description: Saga state not found for the specified order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/saga/states:
+    get:
+      tags: [Saga]
+      summary: List all saga states
+      operationId: listSagaStates
+      description: Retrieves the current state of all sagas.
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Saga states retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SagaResult'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/saga/orders/async:
+    post:
+      tags: [Saga]
+      summary: Execute order saga asynchronously
+      operationId: executeOrderSagaAsync
+      description: Initiates an asynchronous order saga via AWS Step Functions and returns the execution ARN immediately.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '202':
+          description: Saga execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartResult'
+        '409':
+          description: Duplicate request (idempotency conflict)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/saga/executions:
+    get:
+      tags: [Saga]
+      summary: Get async saga execution status
+      operationId: getExecutionStatus
+      description: Retrieves the current status of an asynchronous saga execution.
+      parameters:
+        - name: executionArn
+          in: query
+          required: true
+          description: ARN of the Step Functions execution
+          schema:
+            type: string
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Execution status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionStatus'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      description: Unique identifier of the order
+      schema:
+        type: string
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Unique key to ensure idempotent processing of the request
+      schema:
+        type: string
+        format: uuid
+
+    XTraceId:
+      name: X-Trace-Id
+      in: header
+      required: false
+      description: Distributed tracing identifier for request correlation
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    OrderRequest:
+      type: object
+      required:
+        - orderId
+        - productId
+        - quantity
+        - amount
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier for the order
+        productId:
+          type: string
+          description: Identifier of the product being ordered
+        quantity:
+          type: integer
+          format: int32
+          description: Number of units to order
+          minimum: 1
+        amount:
+          type: number
+          format: double
+          description: Total monetary amount for the order
+          minimum: 0
+
+    SagaResult:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier of the order
+        success:
+          type: boolean
+          description: Whether the saga completed successfully
+        message:
+          type: string
+          description: Human-readable message describing the saga outcome
+        order:
+          $ref: '#/components/schemas/OrderResponse'
+        payment:
+          $ref: '#/components/schemas/PaymentResponse'
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier of the order
+        status:
+          type: string
+          description: Current status of the order
+          enum:
+            - PENDING
+            - COMPLETED
+            - CANCELLED
+
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+          description: Unique identifier of the payment
+        orderId:
+          type: string
+          description: Identifier of the associated order
+        status:
+          type: string
+          description: Current status of the payment
+          enum:
+            - AUTHORIZED
+            - CAPTURED
+            - REFUNDED
+            - FAILED
+        success:
+          type: boolean
+          description: Whether the payment operation was successful
+
+    StartResult:
+      type: object
+      properties:
+        executionArn:
+          type: string
+          description: ARN of the Step Functions execution
+        orderId:
+          type: string
+          description: Unique identifier of the order
+
+    ExecutionStatus:
+      type: object
+      properties:
+        executionArn:
+          type: string
+          description: ARN of the Step Functions execution
+        status:
+          type: string
+          description: Current execution status
+        input:
+          type: string
+          description: Execution input JSON
+        output:
+          type: string
+          description: Execution output JSON
+        startDate:
+          type: string
+          description: Execution start timestamp
+        stopDate:
+          type: string
+          description: Execution stop timestamp
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        error:
+          type: string
+          description: Short error description
+        message:
+          type: string
+          description: Detailed error message
