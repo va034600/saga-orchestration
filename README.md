@@ -242,10 +242,10 @@ cd kotlin
 
 ```bash
 cd kotlin
-./gradlew :orchestrator:bootRun
-./gradlew :order-service:bootRun
-./gradlew :payment-service:bootRun
-./gradlew :compensation-service:bootRun
+./gradlew :orchestrator:bootstrap:bootRun
+./gradlew :order-service:bootstrap:bootRun
+./gradlew :payment-service:bootstrap:bootRun
+./gradlew :compensation-service:bootstrap:bootRun
 ```
 
 ## 動作確認
