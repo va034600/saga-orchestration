@@ -1,13 +1,15 @@
-package com.example.order.entity
+package com.example.order.infrastructure.persistence
 
-import com.example.common.dto.OrderStatus
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
 @Table(name = "orders")
-class Order(
+class OrderJpaEntity(
     @Id
     @Column(name = "order_id", nullable = false)
     val orderId: String,
@@ -21,13 +23,12 @@ class Order(
     @Column(nullable = false, precision = 19, scale = 2)
     val amount: BigDecimal,
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var status: OrderStatus = OrderStatus.PENDING,
+    var status: String,
 
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),
 
     @Column(name = "updated_at", nullable = false)
-    var updatedAt: Instant = Instant.now()
+    var updatedAt: Instant = Instant.now(),
 )
