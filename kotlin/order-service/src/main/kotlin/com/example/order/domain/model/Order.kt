@@ -42,15 +42,18 @@ class Order private constructor(
             productId: String,
             quantity: Int,
             amount: BigDecimal,
-        ): Order = Order(
-            id = orderId,
-            productId = productId,
-            quantity = quantity,
-            amount = Money(amount),
-            status = OrderStatus.PENDING,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now(),
-        )
+        ): Order {
+            val now = Instant.now()
+            return Order(
+                id = orderId,
+                productId = productId,
+                quantity = quantity,
+                amount = Money(amount),
+                status = OrderStatus.PENDING,
+                createdAt = now,
+                updatedAt = now,
+            )
+        }
 
         fun reconstitute(
             orderId: OrderId,
