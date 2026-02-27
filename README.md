@@ -75,13 +75,26 @@ Step Functions (order-saga)
 
 ```
 saga-orchestration/
-├── kotlin/                          # Gradle ルートプロジェクト
+├── services/                        # 言語非依存リソース
+│   ├── common/
+│   │   └── openapi.yml              #   共有 DTO 定義
+│   ├── order-service/
+│   │   ├── openapi.yml              #   API 定義
+│   │   └── db/migration/            #   Flyway マイグレーション SQL
+│   ├── payment-service/
+│   │   ├── openapi.yml
+│   │   └── db/migration/
+│   ├── compensation-service/
+│   │   └── db/migration/
+│   └── orchestrator/
+│       ├── openapi.yml
+│       └── db/migration/
+├── kotlin/                          # Kotlin + Spring Boot 実装（Gradle ルートプロジェクト）
 │   ├── build.gradle.kts
 │   ├── settings.gradle.kts
 │   ├── gradle.properties
 │   ├── gradlew / gradlew.bat
 │   ├── common/                      # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
-│   │   └── openapi.yml              #   共通スキーマ (コード生成用)
 │   ├── order-service/               # 注文管理 (:8081)
 │   │   ├── domain/
 │   │   ├── application/
@@ -317,7 +330,7 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 
 ## DB スキーマ
 
-各サービスのマイグレーションは Flyway で管理 (`src/main/resources/db/migration/`)。
+各サービスのマイグレーションは Flyway で管理（`services/<service>/db/migration/`）。ビルド時に `processResources` で Kotlin プロジェクトにコピーされる。
 
 | サービス | テーブル |
 |---|---|
@@ -328,11 +341,10 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 
 ## OpenAPI
 
-API仕様は各サービスモジュール直下に配置:
+API 定義は `services/` 配下に言語非依存リソースとして配置:
 
-- `kotlin/order-service/openapi.yml`
-- `kotlin/payment-service/openapi.yml`
-- `kotlin/orchestrator/openapi.yml`
-- `kotlin/compensation-service/openapi.yml`
+- `services/order-service/openapi.yml`
+- `services/payment-service/openapi.yml`
+- `services/orchestrator/openapi.yml`
 
-共通スキーマ（コード生成用）: `kotlin/common/openapi.yml`
+共通スキーマ（コード生成用）: `services/common/openapi.yml`
