@@ -26,20 +26,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Sync specs
+      - name: Build site
         run: |
-          mkdir -p docs/specs
-          cp services/orchestrator/openapi.yml docs/specs/orchestrator.yml
-          cp services/order-service/openapi.yml docs/specs/order-service.yml
-          cp services/payment-service/openapi.yml docs/specs/payment-service.yml
-          cp kotlin/compensation-service/bootstrap/openapi.yml docs/specs/compensation-service.yml
-          if ! git diff --quiet docs/specs/; then
-            echo "::error::docs/specs/ is out of sync with source openapi.yml files. Run the copy commands above and commit."
-            git diff docs/specs/
-            exit 1
-          fi
+          mkdir -p _site/specs
+          cp docs/index.html _site/
+          cp services/orchestrator/openapi.yml _site/specs/orchestrator.yml
+          cp services/order-service/openapi.yml _site/specs/order-service.yml
+          cp services/payment-service/openapi.yml _site/specs/payment-service.yml
+          cp kotlin/compensation-service/bootstrap/openapi.yml _site/specs/compensation-service.yml
       - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
