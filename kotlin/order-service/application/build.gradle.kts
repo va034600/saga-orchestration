@@ -21,6 +21,8 @@ dependencies {
     "integrationTestImplementation"("org.springframework.boot:spring-boot-starter-data-jpa")
     "integrationTestImplementation"("org.flywaydb:flyway-core")
     "integrationTestRuntimeOnly"("com.h2database:h2")
+    "integrationTestRuntimeOnly"("org.postgresql:postgresql")
+    "integrationTestRuntimeOnly"("org.flywaydb:flyway-database-postgresql")
 }
 
 tasks.register<Test>("integrationTest") {
