@@ -69,3 +69,11 @@ saga-orchestration/
   - compensation-service: `outbox_tasks` → HTTP 補償呼び出し
 - **Saga（同期）**: orchestrator が order → payment → complete を順次呼び出し、失敗時に補償イベントを発行
 - **Saga（非同期）**: AWS Step Functions のステートマシンで同等フローを実行
+
+## テスト
+
+- テスト名は日本語で記述する（`` fun `新規注文を作成しPENDINGステータスで返す`() ``）
+- 単体テスト: `src/test/kotlin` — MockK でモック
+- 結合テスト: `src/integration/kotlin` — `@SpringBootTest` + Flyway + H2
+  - 実行: `./gradlew :<service>:application:integrationTest`
+- パッケージはテスト対象と同じにする（例: `com.example.order.application`）

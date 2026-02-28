@@ -53,7 +53,7 @@ class OrderApplicationServiceTest {
     inner class CreateOrder {
 
         @Test
-        fun `creates a new order with PENDING status`() {
+        fun `新規注文を作成しPENDINGステータスで返す`() {
             val request = OrderRequest(orderId, productId, quantity, amount)
             every { orderRepository.findById(OrderId(orderId)) } returns null
             every { orderRepository.save(any()) } answers { firstArg() }
@@ -66,7 +66,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `returns existing order when already exists`() {
+        fun `既存注文がある場合はそのまま返す`() {
             val request = OrderRequest(orderId, productId, quantity, amount)
             every { orderRepository.findById(OrderId(orderId)) } returns pendingOrder()
 
@@ -82,7 +82,7 @@ class OrderApplicationServiceTest {
     inner class CompleteOrder {
 
         @Test
-        fun `completes a PENDING order`() {
+        fun `PENDING注文をCOMPLETEDに遷移する`() {
             every { orderRepository.findById(OrderId(orderId)) } returns pendingOrder()
             every { orderRepository.save(any()) } answers { firstArg() }
 
@@ -93,7 +93,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `throws OrderNotFoundException when order does not exist`() {
+        fun `注文が存在しない場合はOrderNotFoundExceptionを投げる`() {
             every { orderRepository.findById(OrderId(orderId)) } returns null
 
             assertThrows<OrderNotFoundException> {
@@ -102,7 +102,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `throws SagaException on invalid state transition`() {
+        fun `不正な状態遷移の場合はSagaExceptionを投げる`() {
             every { orderRepository.findById(OrderId(orderId)) } returns completedOrder()
 
             assertThrows<SagaException> {
@@ -115,7 +115,7 @@ class OrderApplicationServiceTest {
     inner class CancelOrder {
 
         @Test
-        fun `cancels a PENDING order`() {
+        fun `PENDING注文をCANCELLEDに遷移する`() {
             every { orderRepository.findById(OrderId(orderId)) } returns pendingOrder()
             every { orderRepository.save(any()) } answers { firstArg() }
 
@@ -126,7 +126,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `throws OrderNotFoundException when order does not exist`() {
+        fun `注文が存在しない場合はOrderNotFoundExceptionを投げる`() {
             every { orderRepository.findById(OrderId(orderId)) } returns null
 
             assertThrows<OrderNotFoundException> {
@@ -135,7 +135,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `throws SagaException on invalid state transition`() {
+        fun `不正な状態遷移の場合はSagaExceptionを投げる`() {
             every { orderRepository.findById(OrderId(orderId)) } returns completedOrder()
 
             assertThrows<SagaException> {
@@ -148,7 +148,7 @@ class OrderApplicationServiceTest {
     inner class GetOrder {
 
         @Test
-        fun `returns existing order`() {
+        fun `注文情報を返す`() {
             every { orderRepository.findById(OrderId(orderId)) } returns pendingOrder()
 
             val response = sut.getOrder(orderId)
@@ -158,7 +158,7 @@ class OrderApplicationServiceTest {
         }
 
         @Test
-        fun `throws OrderNotFoundException when order does not exist`() {
+        fun `注文が存在しない場合はOrderNotFoundExceptionを投げる`() {
             every { orderRepository.findById(OrderId(orderId)) } returns null
 
             assertThrows<OrderNotFoundException> {
