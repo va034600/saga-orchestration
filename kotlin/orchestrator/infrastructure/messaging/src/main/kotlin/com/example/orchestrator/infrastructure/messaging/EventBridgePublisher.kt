@@ -31,9 +31,15 @@ class EventBridgePublisher(
             .build()
 
         val result = eventBridgeClient.putEvents(request)
+        if (result.failedEntryCount() > 0) {
+            throw RuntimeException(
+                "Failed to publish compensation event for order ${event.orderId}: " +
+                    "failedCount=${result.failedEntryCount()}"
+            )
+        }
         log.info(
-            "Published compensation event for order {}: type={}, failedCount={}",
-            event.orderId, event.compensationType, result.failedEntryCount()
+            "Published compensation event for order {}: type={}",
+            event.orderId, event.compensationType
         )
     }
 }

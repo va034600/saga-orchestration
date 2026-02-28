@@ -4,6 +4,7 @@ import com.example.common.dto.OrderRequest
 import com.example.common.dto.OrderResponse
 import com.example.common.idempotency.Idempotent
 import com.example.order.application.OrderApplicationService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,7 +18,7 @@ class OrderController(
     @Idempotent
     fun createOrder(@RequestBody request: OrderRequest): ResponseEntity<OrderResponse> {
         val response = orderApplicationService.createOrder(request)
-        return ResponseEntity.ok(response)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @PutMapping("/{orderId}/complete")

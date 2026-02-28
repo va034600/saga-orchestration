@@ -69,7 +69,7 @@ class Compensation private constructor(
                 id = null,
                 orderId = orderId,
                 compensationType = compensationType,
-                status = CompensationStatus.PROCESSING,
+                status = CompensationStatus.PENDING,
                 errorMessage = null,
                 createdAt = now,
                 completedAt = null,

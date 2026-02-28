@@ -3,7 +3,7 @@ package com.example.orchestrator.domain.model
 import com.example.orchestrator.domain.StepStatus
 import java.time.Instant
 
-class SagaStep(
+class SagaStep private constructor(
     val id: Long?,
     val stepName: String,
     val status: StepStatus,

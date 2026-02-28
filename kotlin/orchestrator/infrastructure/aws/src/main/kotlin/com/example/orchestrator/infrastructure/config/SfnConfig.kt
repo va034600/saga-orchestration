@@ -15,12 +15,14 @@ class SfnConfig {
     @Bean
     fun sfnClient(
         @Value("\${spring.cloud.aws.endpoint:http://localhost:4566}") endpoint: String,
-        @Value("\${spring.cloud.aws.region.static:ap-northeast-1}") region: String
+        @Value("\${spring.cloud.aws.region.static:ap-northeast-1}") region: String,
+        @Value("\${spring.cloud.aws.credentials.access-key:test}") accessKey: String,
+        @Value("\${spring.cloud.aws.credentials.secret-key:test}") secretKey: String,
     ): SfnClient = SfnClient.builder()
         .endpointOverride(URI.create(endpoint))
         .region(Region.of(region))
         .credentialsProvider(
-            StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test"))
+            StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
         )
         .build()
 }

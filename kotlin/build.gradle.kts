@@ -17,7 +17,6 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "io.spring.dependency-management")
 
     configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
@@ -34,7 +33,6 @@ subprojects {
 
     dependencies {
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
-        "implementation"("com.fasterxml.jackson.module:jackson-module-kotlin")
 
         "testImplementation"("org.springframework.boot:spring-boot-starter-test")
         "testImplementation"("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -43,5 +41,19 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+}
+
+// Spring plugin / Jackson は domain 以外のモジュールにのみ適用
+val springModules = subprojects.filter {
+    it.path.contains("bootstrap") ||
+        it.path.contains("infrastructure") ||
+        it.path.contains("application") ||
+        it.name == "common"
+}
+configure(springModules) {
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
+    dependencies {
+        "implementation"("com.fasterxml.jackson.module:jackson-module-kotlin")
     }
 }

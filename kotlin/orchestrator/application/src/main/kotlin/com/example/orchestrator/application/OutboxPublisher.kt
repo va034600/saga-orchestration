@@ -28,8 +28,7 @@ class OutboxPublisher(
                 val published = event.markPublished()
                 outboxEventRepository.save(published)
             } catch (ex: Exception) {
-                log.warn("Failed to publish outbox event id={}: {}", event.id, ex.message)
-                break
+                log.error("Failed to publish outbox event id={}: {}", event.id, ex.message, ex)
             }
         }
     }

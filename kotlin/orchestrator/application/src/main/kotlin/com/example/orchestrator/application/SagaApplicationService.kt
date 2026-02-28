@@ -13,7 +13,7 @@ import com.example.orchestrator.domain.model.SagaState
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 
 @Service
 class SagaApplicationService(
@@ -21,32 +21,42 @@ class SagaApplicationService(
     private val outboxEventRepository: OutboxEventRepository,
     private val objectMapper: ObjectMapper,
     private val sagaStateRepository: SagaStateRepository,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    @Transactional
     fun executeSaga(request: OrderRequest, traceId: String): SagaResult {
-        var sagaState = sagaStateRepository.save(SagaState.create(orderId = request.orderId))
+        var sagaState = transactionTemplate.execute {
+            sagaStateRepository.save(SagaState.create(orderId = request.orderId))
+        }!!
 
         try {
             // Step 1: Create Order (PENDING)
-            sagaState = sagaStateRepository.save(sagaState.addStep("CREATE_ORDER"))
+            sagaState = transactionTemplate.execute {
+                sagaStateRepository.save(sagaState.addStep("CREATE_ORDER"))
+            }!!
             serviceClients.createOrder(request, traceId)
             sagaState = sagaState.completeCurrentStep()
 
             // Step 2: Execute Payment (authorize + capture)
-            sagaState = sagaStateRepository.save(sagaState.addStep("EXECUTE_PAYMENT"))
+            sagaState = transactionTemplate.execute {
+                sagaStateRepository.save(sagaState.addStep("EXECUTE_PAYMENT"))
+            }!!
             val paymentRequest = PaymentRequest(orderId = request.orderId, amount = request.amount)
             serviceClients.authorizePayment(paymentRequest, traceId)
             val paymentResponse = serviceClients.capturePayment(request.orderId, traceId)
             sagaState = sagaState.completeCurrentStep()
 
             // Step 3: Complete Order (COMPLETED)
-            sagaState = sagaStateRepository.save(sagaState.addStep("COMPLETE_ORDER"))
+            sagaState = transactionTemplate.execute {
+                sagaStateRepository.save(sagaState.addStep("COMPLETE_ORDER"))
+            }!!
             val finalOrder = serviceClients.completeOrder(request.orderId, traceId)
             sagaState = sagaState.completeCurrentStep()
 
-            sagaState = sagaStateRepository.save(sagaState.markCompleted())
+            transactionTemplate.execute {
+                sagaStateRepository.save(sagaState.markCompleted())
+            }
 
             log.info("[{}] Saga completed for order: {}", traceId, request.orderId)
             return SagaResult(
@@ -58,9 +68,10 @@ class SagaApplicationService(
             )
         } catch (ex: Exception) {
             log.error("[{}] Saga failed for order {}: {}", traceId, request.orderId, ex.message)
-            sagaState = sagaStateRepository.save(sagaState.markFailed())
-
-            publishCompensations(request, sagaState)
+            transactionTemplate.execute {
+                sagaState = sagaStateRepository.save(sagaState.markFailed())
+                publishCompensations(request, sagaState)
+            }
 
             return SagaResult(
                 orderId = request.orderId,
