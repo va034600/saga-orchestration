@@ -76,4 +76,8 @@ saga-orchestration/
 - 単体テスト: `src/test/kotlin` — MockK でモック
 - 結合テスト: `src/integration/kotlin` — `@SpringBootTest` + Flyway + H2
   - 実行: `./gradlew :<service>:application:integrationTest`
+- E2E テスト: `kotlin/e2e-test/` — 実サービス群を起動して HTTP 経由で検証
+  - 実行: `./gradlew :e2e-test:test`
+  - `./gradlew test` では自動スキップされる（`onlyIf` ガード）
+  - CI では main push 時のみ実行
 - パッケージはテスト対象と同じにする（例: `com.example.order.application`）

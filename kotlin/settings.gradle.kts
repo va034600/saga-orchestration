@@ -42,4 +42,6 @@ include(
     "orchestrator:infrastructure:messaging",
     "orchestrator:infrastructure:aws",
     "orchestrator:bootstrap",
+    // e2e test
+    "e2e-test",
 )
