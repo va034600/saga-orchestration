@@ -51,9 +51,6 @@ tasks.named("compileKotlin") {
 
 tasks.processResources {
     from("$rootDir/../services/order-service") {
-        include("db/migration/**")
-    }
-    from("$rootDir/../services/order-service") {
         include("openapi.yml")
         into("static")
     }
@@ -68,7 +65,5 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springDocVersion")}")
-    implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
-    implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
     runtimeOnly("org.postgresql:postgresql:${property("postgresDriverVersion")}")
 }

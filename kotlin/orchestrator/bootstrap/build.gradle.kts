@@ -55,9 +55,6 @@ tasks.named("compileKotlin") {
 
 tasks.processResources {
     from("$rootDir/../services/orchestrator") {
-        include("db/migration/**")
-    }
-    from("$rootDir/../services/orchestrator") {
         include("openapi.yml")
         into("static")
     }
@@ -79,7 +76,5 @@ dependencies {
     implementation("software.amazon.awssdk:eventbridge")
     implementation("software.amazon.awssdk:sfn")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springDocVersion")}")
-    implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
-    implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
     runtimeOnly("org.postgresql:postgresql:${property("postgresDriverVersion")}")
 }
