@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'services/**/openapi.yml'
+      - 'services/**/db/migration/**'
+      - 'services/**/.tbls.yml'
       - 'kotlin/compensation-service/bootstrap/openapi.yml'
       - 'docs/**'
       - '.github/workflows/pages.yml'
@@ -24,8 +26,80 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: saga
+          POSTGRES_PASSWORD: saga
+          POSTGRES_DB: saga
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U saga"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create databases
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: saga
+          PGPASSWORD: saga
+        run: |
+          psql -c "CREATE DATABASE orchestrator_db;"
+          psql -c "CREATE DATABASE order_db;"
+          psql -c "CREATE DATABASE payment_db;"
+          psql -c "CREATE DATABASE compensation_db;"
+
+      - name: Apply migrations
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: saga
+          PGPASSWORD: saga
+        run: |
+          for db_service in orchestrator:orchestrator_db order-service:order_db payment-service:payment_db compensation-service:compensation_db; do
+            service="${db_service%%:*}"
+            db="${db_service##*:}"
+            for sql in $(ls services/"$service"/db/migration/V*.sql 2>/dev/null | sort); do
+              echo "Applying $sql to $db"
+              psql -d "$db" -f "$sql"
+            done
+          done
+
+      - name: Install tbls
+        run: |
+          curl -fsSL https://github.com/k1LoW/tbls/releases/latest/download/tbls_linux_amd64.tar.gz | tar xz
+          sudo mv tbls /usr/local/bin/
+
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pandoc
+
+      - name: Generate schema docs
+        run: |
+          for service in orchestrator order-service payment-service compensation-service; do
+            tbls doc --rm-dist -c "services/$service/.tbls.yml"
+            dir="services/$service/docs"
+            for md in "$dir"/*.md; do
+              [ -f "$md" ] || continue
+              sed -i 's/README\.md/index.html/g; s/\.md)/\.html)/g' "$md"
+              base=$(basename "$md" .md)
+              if [ "$base" = "README" ]; then
+                out="$dir/index.html"
+              else
+                out="$dir/$base.html"
+              fi
+              pandoc "$md" -f gfm -t html5 --standalone --metadata title="$service / $base" -o "$out"
+            done
+            rm -f "$dir"/*.md
+            mkdir -p "_site/schema/$service"
+            cp -r "$dir/"* "_site/schema/$service/"
+          done
+
       - name: Build site
         run: |
           mkdir -p _site/specs
@@ -34,6 +108,7 @@ jobs:
           cp services/order-service/openapi.yml _site/specs/order-service.yml
           cp services/payment-service/openapi.yml _site/specs/payment-service.yml
           cp kotlin/compensation-service/bootstrap/openapi.yml _site/specs/compensation-service.yml
+
       - uses: actions/upload-pages-artifact@v3
       - id: deployment
         uses: actions/deploy-pages@v4

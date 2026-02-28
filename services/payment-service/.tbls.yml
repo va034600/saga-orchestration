@@ -1,0 +1,2 @@
+dsn: postgres://saga:saga@localhost:5432/payment_db?sslmode=disable
+docPath: docs

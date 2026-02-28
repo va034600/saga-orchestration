@@ -40,6 +40,22 @@ services:
           {"url":"/specs/compensation-service.yml","name":"Compensation Service (:8084)"}
         ]
 
+  tbls:
+    build: ./tbls
+    container_name: tbls
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../services/orchestrator/db/migration:/migration/orchestrator:ro
+      - ../services/order-service/db/migration:/migration/order-service:ro
+      - ../services/payment-service/db/migration:/migration/payment-service:ro
+      - ../services/compensation-service/db/migration:/migration/compensation-service:ro
+    networks:
+      - saga-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   localstack:
     image: localstack/localstack:4.13
     container_name: localstack
