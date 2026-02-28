@@ -81,6 +81,8 @@ jobs:
 
       - name: Generate schema docs
         run: |
+          mkdir -p _site/schema
+          cp docs/schema-style.css _site/schema/style.css
           for service in orchestrator order-service payment-service compensation-service; do
             tbls doc --rm-dist -c "services/$service/.tbls.yml"
             dir="services/$service/docs"
@@ -93,7 +95,10 @@ jobs:
               else
                 out="$dir/$base.html"
               fi
-              pandoc "$md" -f gfm -t html5 --standalone --metadata title="$service / $base" -o "$out"
+              pandoc "$md" -f gfm -t html5 --standalone \
+                --metadata title="$service / $base" \
+                --css ../style.css \
+                -o "$out"
             done
             rm -f "$dir"/*.md
             mkdir -p "_site/schema/$service"

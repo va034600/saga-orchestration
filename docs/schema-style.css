@@ -1,0 +1,188 @@
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --text-secondary: #656d76;
+  --link: #0969da;
+  --accent: #0969da;
+  --code-bg: #eff1f3;
+  --table-header-bg: #f6f8fa;
+  --table-row-hover: #f3f8ff;
+  --badge-bg: #ddf4ff;
+  --badge-text: #0969da;
+  --nullable-yes: #1a7f37;
+  --nullable-no: #cf222e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* ---- Headings ---- */
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 36px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+
+/* ---- Links ---- */
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---- Paragraphs ---- */
+p { margin-bottom: 12px; }
+
+/* ---- Code ---- */
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ---- Tables ---- */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+thead th {
+  background: var(--table-header-bg);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  color: var(--text);
+}
+
+tbody td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+/* Name column (first) - monospace */
+tbody td:first-child {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Type column styling */
+tbody td:nth-child(2) {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ---- SVG / ER Diagram ---- */
+img[src$=".svg"],
+object[type="image/svg+xml"],
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 16px 0 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--bg);
+}
+
+/* ---- Lists ---- */
+ul, ol {
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 4px;
+}
+
+/* Index page: table links list */
+ul li a {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 14px;
+}
+
+/* ---- Back link / navigation ---- */
+p > a[href="index.html"],
+p > a[href="./index.html"] {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+p > a[href="index.html"]::before,
+p > a[href="./index.html"]::before {
+  content: "\2190\00a0";
+}
+
+/* ---- Footer ---- */
+footer, .footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+}

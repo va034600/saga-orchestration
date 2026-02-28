@@ -1,2 +1,22 @@
 dsn: postgres://saga:saga@localhost:5432/orchestrator_db?sslmode=disable
 docPath: docs
+
+dict:
+  Tables: テーブル一覧
+  Description: 概要
+  Columns: カラム一覧
+  Indexes: INDEX一覧
+  Constraints: 制約一覧
+  Triggers: トリガー
+  Relations: ER図
+  Table Definition: テーブル定義
+  Referenced Tables: 参照先テーブル
+  Name: 名前
+  Type: データ型
+  Default: デフォルト値
+  Nullable: NULL許可
+  Extra Definition: 追加定義
+  Children: 子テーブル
+  Parents: 親テーブル
+  Comment: コメント
+  Definition: 定義
