@@ -86,8 +86,9 @@ jobs:
           mkdir -p _site/schema
           cp docs/schema-style.css _site/schema/style.css
           for service in orchestrator order-service payment-service compensation-service; do
-            tbls doc --rm-dist -c "services/$service/.tbls.yml"
             dir="services/$service/docs"
+            sed "s|^docPath:.*|docPath: ${dir}|" "services/$service/.tbls.yml" > "/tmp/.tbls-${service}.yml"
+            tbls doc --rm-dist -c "/tmp/.tbls-${service}.yml"
             for md in "$dir"/*.md; do
               [ -f "$md" ] || continue
               sed -i 's/README\.md/index.html/g; s/\.md\([)#]\)/\.html\1/g' "$md"
