@@ -65,7 +65,8 @@ jobs:
           for db_service in orchestrator:orchestrator_db order-service:order_db payment-service:payment_db compensation-service:compensation_db; do
             service="${db_service%%:*}"
             db="${db_service##*:}"
-            for sql in $(ls services/"$service"/db/migration/V*.sql 2>/dev/null | sort); do
+            for sql in services/"$service"/db/migration/V*.sql; do
+              [ -f "$sql" ] || continue
               echo "Applying $sql to $db"
               psql -d "$db" -f "$sql"
             done
@@ -88,7 +89,7 @@ jobs:
             dir="services/$service/docs"
             for md in "$dir"/*.md; do
               [ -f "$md" ] || continue
-              sed -i 's/README\.md/index.html/g; s/\.md)/\.html)/g' "$md"
+              sed -i 's/README\.md/index.html/g; s/\.md\([)#]\)/\.html\1/g' "$md"
               base=$(basename "$md" .md)
               if [ "$base" = "README" ]; then
                 out="$dir/index.html"
@@ -97,6 +98,7 @@ jobs:
               fi
               pandoc "$md" -f gfm -t html5 --standalone \
                 --metadata title="$service / $base" \
+                --metadata lang=ja \
                 --css ../style.css \
                 -o "$out"
             done

@@ -7,7 +7,8 @@ echo "=== Applying migrations ==="
 for pair in $SERVICES; do
   service="${pair%%:*}"
   db="${pair##*:}"
-  for sql in $(ls /migration/"$service"/V*.sql 2>/dev/null | sort); do
+  for sql in /migration/"$service"/V*.sql; do
+    [ -f "$sql" ] || continue
     echo "  $sql -> $db"
     psql "postgres://saga:saga@postgres:5432/$db?sslmode=disable" -f "$sql"
   done
@@ -30,7 +31,7 @@ for service_dir in /docs/*/; do
   service=$(basename "$service_dir")
   for md in "$service_dir"*.md; do
     [ -f "$md" ] || continue
-    sed -i 's/README\.md/index.html/g; s/\.md)/\.html)/g' "$md"
+    sed -i 's/README\.md/index.html/g; s/\.md\([)#]\)/\.html\1/g' "$md"
     base=$(basename "$md" .md)
     if [ "$base" = "README" ]; then
       out="${service_dir}index.html"
@@ -39,6 +40,7 @@ for service_dir in /docs/*/; do
     fi
     pandoc "$md" -f gfm -t html5 --standalone \
       --metadata title="$service / $base" \
+      --metadata lang=ja \
       --css ../style.css \
       -o "$out"
   done

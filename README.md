@@ -337,7 +337,7 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 | order-service | `orders`, `idempotency_keys` |
 | payment-service | `payments`, `idempotency_keys` |
 | orchestrator | `saga_states`, `saga_steps`, `outbox_events`, `idempotency_keys` |
-| compensation-service | `compensations`, `outbox_tasks` |
+| compensation-service | `compensations`, `outbox_tasks`, `idempotency_keys` |
 
 ## OpenAPI / Swagger UI
 
