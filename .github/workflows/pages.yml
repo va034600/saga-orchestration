@@ -74,7 +74,8 @@ jobs:
 
       - name: Install tbls
         run: |
-          curl -fsSL https://github.com/k1LoW/tbls/releases/latest/download/tbls_linux_amd64.tar.gz | tar xz
+          TBLS_VERSION=$(curl -fsSL https://api.github.com/repos/k1LoW/tbls/releases/latest | jq -r .tag_name)
+          curl -fsSL "https://github.com/k1LoW/tbls/releases/download/${TBLS_VERSION}/tbls_${TBLS_VERSION}_linux_amd64.tar.gz" | tar xz
           sudo mv tbls /usr/local/bin/
 
       - name: Install pandoc
