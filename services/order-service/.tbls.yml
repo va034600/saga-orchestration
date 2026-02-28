@@ -1,0 +1,2 @@
+dsn: postgres://saga:saga@localhost:5432/order_db?sslmode=disable
+docPath: docs

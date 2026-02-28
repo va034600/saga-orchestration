@@ -337,7 +337,7 @@ curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-n
 | order-service | `orders`, `idempotency_keys` |
 | payment-service | `payments`, `idempotency_keys` |
 | orchestrator | `saga_states`, `saga_steps`, `outbox_events`, `idempotency_keys` |
-| compensation-service | `compensations`, `outbox_tasks` |
+| compensation-service | `compensations`, `outbox_tasks`, `idempotency_keys` |
 
 ## OpenAPI / Swagger UI
 
@@ -364,3 +364,37 @@ API 定義は `services/` 配下に言語非依存リソースとして配置:
 | order-service | http://localhost:8081/swagger-ui.html |
 | payment-service | http://localhost:8083/swagger-ui.html |
 | compensation-service | http://localhost:8084/swagger-ui.html |
+
+## スキーマドキュメント（tbls）
+
+[tbls](https://github.com/k1LoW/tbls) で各サービスの DB スキーマドキュメント（ER 図 + テーブル定義）を自動生成し、GitHub Pages で公開している。
+
+| サービス | GitHub Pages |
+|---------|-------------|
+| orchestrator | https://va034600.github.io/saga-orchestration/schema/orchestrator/ |
+| order-service | https://va034600.github.io/saga-orchestration/schema/order-service/ |
+| payment-service | https://va034600.github.io/saga-orchestration/schema/payment-service/ |
+| compensation-service | https://va034600.github.io/saga-orchestration/schema/compensation-service/ |
+
+### ローカルで閲覧
+
+Docker Compose でマイグレーション適用 + ドキュメント生成 + HTTP サーバーが起動する:
+
+```bash
+docker compose -f docker/docker-compose.yml up tbls -d
+```
+
+http://localhost:3000 で閲覧可能。
+
+### ローカルで生成（tbls インストール済みの場合）
+
+Docker PostgreSQL 起動中に:
+
+```bash
+tbls doc --rm-dist -c services/orchestrator/.tbls.yml
+tbls doc --rm-dist -c services/order-service/.tbls.yml
+tbls doc --rm-dist -c services/payment-service/.tbls.yml
+tbls doc --rm-dist -c services/compensation-service/.tbls.yml
+```
+
+生成先は各 `services/<service>/docs/` ディレクトリ。
