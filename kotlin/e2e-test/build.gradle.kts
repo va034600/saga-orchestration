@@ -8,4 +8,7 @@ tasks.test {
     onlyIf {
         gradle.startParameter.taskNames.any { it.contains("e2e-test") }
     }
+    testLogging {
+        showStandardStreams = true
+    }
 }
