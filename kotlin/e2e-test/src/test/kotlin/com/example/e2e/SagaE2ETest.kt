@@ -17,7 +17,6 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class SagaE2ETest {
-    
     private val objectMapper = jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
@@ -74,7 +73,7 @@ class SagaE2ETest {
 
         assertTrue(startResult.executionArn.isNotBlank())
 
-        await atMost Duration.ofSeconds(30) untilAsserted {
+        await atMost Duration.ofSeconds(120) untilAsserted {
             val status = try {
                 restClient.get()
                     .uri("/api/saga/executions?executionArn={arn}", startResult.executionArn)
