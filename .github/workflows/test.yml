@@ -145,7 +145,15 @@ jobs:
 
       - name: Run E2E tests
         working-directory: kotlin
-        run: ./gradlew :e2e-test:test
+        run: ./gradlew :e2e-test:test --info
+
+      - name: Upload E2E test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-report
+          path: kotlin/e2e-test/build/reports/tests/test/
+          retention-days: 7
 
       - name: Stop services
         if: always()

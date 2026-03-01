@@ -2,7 +2,6 @@ package com.example.e2e
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.awaitility.kotlin.atMost
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilAsserted
@@ -10,12 +9,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
 import java.time.Duration
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class SagaE2ETest {
+
     private val objectMapper = jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
@@ -33,13 +35,19 @@ class SagaE2ETest {
     fun `同期Sagaで注文が正常に完了する`() {
         val orderId = UUID.randomUUID().toString()
 
-        val response = restClient.post()
-            .uri("/api/saga/orders")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Idempotency-Key", UUID.randomUUID().toString())
-            .body(OrderRequest(orderId = orderId, productId = "PROD-001", quantity = 1, amount = 1000))
-            .retrieve()
-            .body(SagaResult::class.java)!!
+        val response = try {
+            restClient.post()
+                .uri("/api/saga/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .body(OrderRequest(orderId = orderId, productId = "PROD-001", quantity = 1, amount = 1000))
+                .retrieve()
+                .body(SagaResult::class.java)!!
+        } catch (e: RestClientResponseException) {
+            System.err.println("=== E2E Sync Saga Error: ${e.statusCode} ===")
+            System.err.println(e.responseBodyAsString)
+            fail("${e.statusCode} ${e.responseBodyAsString}")
+        }
 
         assertTrue(response.success)
         assertEquals("COMPLETED", response.order?.status)
@@ -50,21 +58,31 @@ class SagaE2ETest {
     fun `非同期Sagaで注文が正常に完了する`() {
         val orderId = UUID.randomUUID().toString()
 
-        val startResult = restClient.post()
-            .uri("/api/saga/orders/async")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Idempotency-Key", UUID.randomUUID().toString())
-            .body(OrderRequest(orderId = orderId, productId = "PROD-001", quantity = 1, amount = 1000))
-            .retrieve()
-            .body(StartResult::class.java)!!
+        val startResult = try {
+            restClient.post()
+                .uri("/api/saga/orders/async")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .body(OrderRequest(orderId = orderId, productId = "PROD-001", quantity = 1, amount = 1000))
+                .retrieve()
+                .body(StartResult::class.java)!!
+        } catch (e: RestClientResponseException) {
+            System.err.println("=== E2E Async Saga Start Error: ${e.statusCode} ===")
+            System.err.println(e.responseBodyAsString)
+            fail("${e.statusCode} ${e.responseBodyAsString}")
+        }
 
         assertTrue(startResult.executionArn.isNotBlank())
 
         await atMost Duration.ofSeconds(30) untilAsserted {
-            val status = restClient.get()
-                .uri("/api/saga/executions?executionArn={arn}", startResult.executionArn)
-                .retrieve()
-                .body(ExecutionStatus::class.java)!!
+            val status = try {
+                restClient.get()
+                    .uri("/api/saga/executions?executionArn={arn}", startResult.executionArn)
+                    .retrieve()
+                    .body(ExecutionStatus::class.java)!!
+            } catch (e: RestClientResponseException) {
+                fail("${e.statusCode} ${e.responseBodyAsString}")
+            }
 
             assertEquals("SUCCEEDED", status.status)
         }
