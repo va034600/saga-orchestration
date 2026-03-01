@@ -17,7 +17,6 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class SagaE2ETest {
-
     private val objectMapper = jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
@@ -86,6 +85,11 @@ class SagaE2ETest {
                 fail("${e.statusCode} ${e.responseBodyAsString}")
             }
 
+            if (status.status != "RUNNING") {
+                System.err.println("=== E2E Async Saga Execution Result ===")
+                System.err.println("status=${status.status}")
+                System.err.println("output=${status.output}")
+            }
             assertEquals("SUCCEEDED", status.status)
         }
     }
