@@ -170,6 +170,22 @@ jobs:
         working-directory: kotlin
         run: ./gradlew :e2e-test:test
 
+      - name: Dump Step Functions execution history
+        if: failure()
+        run: |
+          ENDPOINT="--endpoint-url=http://localhost:4566 --region ap-northeast-1"
+          SM_ARN="arn:aws:states:ap-northeast-1:000000000000:stateMachine:order-saga"
+          EXECUTIONS=$(aws $ENDPOINT stepfunctions list-executions --state-machine-arn "$SM_ARN" --query 'executions[].executionArn' --output text)
+          for ARN in $EXECUTIONS; do
+            echo "=== Execution: $ARN ==="
+            aws $ENDPOINT stepfunctions describe-execution --execution-arn "$ARN"
+            echo "--- History ---"
+            aws $ENDPOINT stepfunctions get-execution-history --execution-arn "$ARN" --query 'events[?type==`TaskFailed` || type==`ExecutionFailed` || type==`LambdaFunctionFailed`]'
+          done
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+
       - name: Upload E2E test report
         if: always()
         uses: actions/upload-artifact@v4
