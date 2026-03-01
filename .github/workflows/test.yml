@@ -107,23 +107,28 @@ jobs:
       - name: Start services
         working-directory: kotlin
         run: |
+          mkdir -p /tmp/e2e-logs
           COMMON_ENV="SPRING_DATASOURCE_USERNAME=saga SPRING_DATASOURCE_PASSWORD=saga SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver"
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/order_db \
-            java -jar order-service/bootstrap/build/libs/bootstrap-*.jar &
+            java -jar order-service/bootstrap/build/libs/bootstrap-*.jar \
+            > /tmp/e2e-logs/order-service.log 2>&1 &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/payment_db \
-            java -jar payment-service/bootstrap/build/libs/bootstrap-*.jar &
+            java -jar payment-service/bootstrap/build/libs/bootstrap-*.jar \
+            > /tmp/e2e-logs/payment-service.log 2>&1 &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/compensation_db \
-            java -jar compensation-service/bootstrap/build/libs/bootstrap-*.jar &
+            java -jar compensation-service/bootstrap/build/libs/bootstrap-*.jar \
+            > /tmp/e2e-logs/compensation-service.log 2>&1 &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/orchestrator_db \
-            java -jar orchestrator/bootstrap/build/libs/bootstrap-*.jar &
+            java -jar orchestrator/bootstrap/build/libs/bootstrap-*.jar \
+            > /tmp/e2e-logs/orchestrator.log 2>&1 &
 
       - name: Wait for services to be healthy
         run: |
@@ -153,6 +158,14 @@ jobs:
         with:
           name: e2e-test-report
           path: kotlin/e2e-test/build/reports/tests/test/
+          retention-days: 7
+
+      - name: Upload service logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-service-logs
+          path: /tmp/e2e-logs/
           retention-days: 7
 
       - name: Stop services

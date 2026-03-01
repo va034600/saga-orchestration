@@ -81,6 +81,8 @@ class SagaE2ETest {
                     .retrieve()
                     .body(ExecutionStatus::class.java)!!
             } catch (e: RestClientResponseException) {
+                System.err.println("=== E2E Async Saga Poll Error: ${e.statusCode} ===")
+                System.err.println(e.responseBodyAsString)
                 fail("${e.statusCode} ${e.responseBodyAsString}")
             }
 
