@@ -104,6 +104,24 @@ jobs:
             sleep 2
           done
 
+      - name: Create databases and run migrations
+        run: |
+          declare -A DB_MAP=(
+            [order-service]=order_db
+            [payment-service]=payment_db
+            [compensation-service]=compensation_db
+            [orchestrator]=orchestrator_db
+          )
+          for service in "${!DB_MAP[@]}"; do
+            db="${DB_MAP[$service]}"
+            echo "Creating database $db ..."
+            docker exec postgres psql -U saga -d saga -c "CREATE DATABASE $db" || true
+            echo "Migrating $db ..."
+            for sql in $(ls services/$service/db/migration/*.sql | sort); do
+              docker exec -i postgres psql -U saga -d "$db" < "$sql"
+            done
+          done
+
       - name: Start services
         working-directory: kotlin
         run: |
