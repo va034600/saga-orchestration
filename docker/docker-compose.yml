@@ -70,6 +70,8 @@ services:
       SERVICES: sqs,events,stepfunctions,lambda
       DEFAULT_REGION: ap-northeast-1
       DEBUG: 0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./localstack:/etc/localstack/init/ready.d

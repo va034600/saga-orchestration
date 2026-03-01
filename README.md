@@ -95,6 +95,7 @@ saga-orchestration/
 │   ├── gradle.properties
 │   ├── gradlew / gradlew.bat
 │   ├── common/                      # 共通DTO, Enum, 例外, 冪等性AOP, トレーシング
+│   ├── e2e-test/                    # E2Eテスト（実サービス起動して検証）
 │   ├── order-service/               # 注文管理 (:8081)
 │   │   ├── domain/
 │   │   ├── application/
@@ -327,6 +328,39 @@ curl -X POST http://localhost:8080/api/saga/orders/async \
 # 実行状態確認
 curl "http://localhost:8080/api/saga/executions?executionArn=arn:aws:states:ap-northeast-1:000000000000:execution:order-saga:saga-ORD-002"
 ```
+
+## テスト
+
+### 単体テスト / 結合テスト
+
+```bash
+cd kotlin
+./gradlew test              # 単体テスト
+./gradlew integrationTest   # 結合テスト（H2）
+```
+
+### E2E テスト
+
+実サービス群を起動し、同期 Saga と非同期 Saga（Step Functions）のフローを HTTP 経由で検証する。
+
+```bash
+# 1. インフラ起動
+cd docker && docker compose up -d postgres localstack
+
+# 2. JAR ビルド
+cd kotlin && ./gradlew bootJar -x test
+
+# 3. 各サービス起動
+java -jar order-service/bootstrap/build/libs/bootstrap.jar &
+java -jar payment-service/bootstrap/build/libs/bootstrap.jar &
+java -jar compensation-service/bootstrap/build/libs/bootstrap.jar &
+java -jar orchestrator/bootstrap/build/libs/bootstrap.jar &
+
+# 4. E2E テスト実行
+./gradlew :e2e-test:test
+```
+
+> `./gradlew test` では `e2e-test` は自動スキップされる（`onlyIf` ガード付き）。CI では main push 時のみ実行。
 
 ## DB スキーマ
 
