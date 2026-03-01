@@ -111,19 +111,19 @@ jobs:
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/order_db \
-            java -jar order-service/bootstrap/build/libs/bootstrap.jar &
+            java -jar order-service/bootstrap/build/libs/bootstrap-*.jar &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/payment_db \
-            java -jar payment-service/bootstrap/build/libs/bootstrap.jar &
+            java -jar payment-service/bootstrap/build/libs/bootstrap-*.jar &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/compensation_db \
-            java -jar compensation-service/bootstrap/build/libs/bootstrap.jar &
+            java -jar compensation-service/bootstrap/build/libs/bootstrap-*.jar &
 
           env $COMMON_ENV \
             SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/orchestrator_db \
-            java -jar orchestrator/bootstrap/build/libs/bootstrap.jar &
+            java -jar orchestrator/bootstrap/build/libs/bootstrap-*.jar &
 
       - name: Wait for services to be healthy
         run: |
