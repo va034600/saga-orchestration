@@ -8,6 +8,9 @@ tasks.processResources {
         include("openapi.yml")
         into("static")
     }
+    from("$rootDir/../services/compensation-service/db/migration") {
+        into("db/migration")
+    }
 }
 
 dependencies {
