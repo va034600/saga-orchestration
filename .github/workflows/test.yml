@@ -10,6 +10,7 @@ on:
     paths:
       - 'kotlin/**'
       - 'services/**'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -30,7 +31,7 @@ jobs:
         run: ./gradlew integrationTest
 
   test-postgresql:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -66,7 +67,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test
 
   e2e:
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
