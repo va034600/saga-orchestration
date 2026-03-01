@@ -71,7 +71,7 @@ services:
       DEFAULT_REGION: ap-northeast-1
       DEBUG: 0
       LAMBDA_DOCKER_FLAGS: "--add-host=host.docker.internal:host-gateway"
-      LAMBDA_DOCKER_NETWORK: host
+      LAMBDA_DOCKER_NETWORK: bridge
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
