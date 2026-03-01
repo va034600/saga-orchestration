@@ -82,7 +82,7 @@ jobs:
 
       - name: Build service JARs
         working-directory: kotlin
-        run: ./gradlew bootJar -x test
+        run: ./gradlew clean bootJar -x test
 
       - name: Wait for infrastructure
         run: |

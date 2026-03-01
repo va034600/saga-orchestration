@@ -17,6 +17,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class SagaE2ETest {
+
     private val objectMapper = jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
