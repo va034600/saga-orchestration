@@ -109,14 +109,11 @@ func writeError(w http.ResponseWriter, status int, errText string, message strin
 
 func handleError(w http.ResponseWriter, err error) {
 	var failed *FailedError
-	var stateErr *InvalidStatusError
 
 	switch {
 	case errors.As(err, &failed):
 		writeError(w, http.StatusUnprocessableEntity, "Unprocessable Entity", err.Error())
-	case errors.As(err, &stateErr):
-		writeError(w, http.StatusUnprocessableEntity, "Unprocessable Entity", err.Error())
 	default:
-		writeError(w, http.StatusInternalServerError, "Internal Server Error", err.Error())
+		writeError(w, http.StatusBadRequest, "Bad Request", err.Error())
 	}
 }

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	"github.com/example/payment-service/internal/middleware"
 	"github.com/jackc/pgx/v5"
@@ -23,7 +24,7 @@ func (s *IdempotencyStore) Find(ctx context.Context, key string) (*middleware.Id
 		FROM idempotency_keys WHERE idempotency_key = $1
 	`, key).Scan(&rec.Key, &rec.StatusCode, &rec.Body)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err

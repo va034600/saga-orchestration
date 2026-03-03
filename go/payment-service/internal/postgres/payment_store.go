@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"context"
-	"time"
+	"errors"
 
 	"github.com/example/payment-service/internal/payment"
 	"github.com/jackc/pgx/v5"
@@ -29,23 +29,19 @@ func (s *PaymentStore) Save(ctx context.Context, p *payment.Payment) error {
 
 func (s *PaymentStore) FindByOrderID(ctx context.Context, orderID string) (*payment.Payment, error) {
 	var (
-		p         payment.Payment
-		status    string
-		createdAt time.Time
-		updatedAt time.Time
+		p      payment.Payment
+		status string
 	)
 	err := s.pool.QueryRow(ctx, `
 		SELECT payment_id, order_id, amount, status, created_at, updated_at
 		FROM payments WHERE order_id = $1
-	`, orderID).Scan(&p.ID, &p.OrderID, &p.Amount, &status, &createdAt, &updatedAt)
+	`, orderID).Scan(&p.ID, &p.OrderID, &p.Amount, &status, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
 	p.Status = payment.Status(status)
-	p.CreatedAt = createdAt
-	p.UpdatedAt = updatedAt
 	return &p, nil
 }

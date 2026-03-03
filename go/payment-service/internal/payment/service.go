@@ -82,6 +82,13 @@ func (s *Service) Refund(ctx context.Context, orderID string) (Response, error) 
 	}
 
 	if err := p.Refund(); err != nil {
+		var stateErr *InvalidStatusError
+		if errors.As(err, &stateErr) {
+			return Response{}, &FailedError{
+				OrderID: orderID,
+				Reason:  "Cannot refund payment in " + string(p.Status) + " status",
+			}
+		}
 		return Response{}, err
 	}
 
