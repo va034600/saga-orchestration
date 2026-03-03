@@ -6,10 +6,12 @@ on:
     paths:
       - 'kotlin/**'
       - 'services/**'
+      - 'go/**'
   pull_request:
     paths:
       - 'kotlin/**'
       - 'services/**'
+      - 'go/**'
   workflow_dispatch:
 
 jobs:
@@ -76,6 +78,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/payment-service/go.mod
 
       - name: Pre-pull Lambda runtime image
         run: docker pull public.ecr.aws/lambda/python:3.12
@@ -87,6 +92,10 @@ jobs:
       - name: Build service JARs
         working-directory: kotlin
         run: ./gradlew clean bootJar -x test
+
+      - name: Build Go payment-service
+        working-directory: go/payment-service
+        run: go build -o /tmp/payment-service ./cmd/server/
 
       - name: Wait for infrastructure
         run: |
@@ -137,9 +146,8 @@ jobs:
             java -jar order-service/bootstrap/build/libs/bootstrap-*.jar \
             > /tmp/e2e-logs/order-service.log 2>&1 &
 
-          env $COMMON_ENV \
-            SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/payment_db \
-            java -jar payment-service/bootstrap/build/libs/bootstrap-*.jar \
+          DATABASE_URL="postgres://saga:saga@localhost:5432/payment_db?sslmode=disable" \
+            /tmp/payment-service \
             > /tmp/e2e-logs/payment-service.log 2>&1 &
 
           env $COMMON_ENV \
@@ -232,6 +240,7 @@ jobs:
         if: always()
         run: |
           pkill -f 'java -jar' || true
+          pkill -f '/tmp/payment-service' || true
 
       - name: Stop infrastructure
         if: always()
