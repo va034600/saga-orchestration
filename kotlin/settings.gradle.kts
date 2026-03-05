@@ -22,11 +22,6 @@ include(
     "order-service:application",
     "order-service:infrastructure:persistence",
     "order-service:bootstrap",
-    // payment-service
-    "payment-service:domain",
-    "payment-service:application",
-    "payment-service:infrastructure:persistence",
-    "payment-service:bootstrap",
     // compensation-service
     "compensation-service:domain",
     "compensation-service:application",

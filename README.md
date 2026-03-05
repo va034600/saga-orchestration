@@ -2,7 +2,7 @@
 
 Sagaオーケストレーションパターンのマイクロサービス実装。
 注文と決済の2サービス構成。同期 / 非同期（Step Functions）の2つの実行モードを提供。
-Kotlin + Spring Boot をメイン言語とし、payment-service は Go 実装も提供（API 互換）。
+Kotlin + Spring Boot をメイン言語とし、payment-service は Go で実装。
 
 ## 技術スタック
 
@@ -116,12 +116,6 @@ saga-orchestration/
 │   │   ├── infrastructure/
 │   │   │   └── persistence/         # JPA エンティティ + リポジトリ実装
 │   │   └── bootstrap/
-│   ├── payment-service/             # 決済管理 (:8083) — Kotlin 版
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   │   └── persistence/         # JPA エンティティ + リポジトリ実装
-│   │   └── bootstrap/
 │   ├── compensation-service/        # 非同期補償処理 (:8084)
 │   │   ├── domain/
 │   │   ├── application/
@@ -140,15 +134,13 @@ saga-orchestration/
 │       │   └── aws/                 # Step Functions クライアント
 │       └── bootstrap/
 ├── go/                              # Go 実装
-│   └── payment-service/             # 決済管理 (:8083) — Go 版（Kotlin 版と API 互換）
+│   └── payment-service/             # 決済管理 (:8083)
 │       ├── cmd/server/main.go       #   エントリポイント + DI 配線
 │       ├── internal/
-│       │   ├── domain/              #   ドメインモデル（immutable）
-│       │   ├── application/         #   ユースケース
-│       │   ├── infrastructure/
-│       │   │   └── persistence/     #   pgx リポジトリ実装
-│       │   ├── handler/             #   HTTP ハンドラ
-│       │   └── middleware/          #   冪等性, トレース, ログ
+│       │   ├── payment/             #   ビジネスロジック + HTTP ハンドラ + DTO
+│       │   ├── postgres/            #   DB 実装（pgx）
+│       │   ├── middleware/          #   冪等性, トレース, ログ
+│       │   └── config/              #   環境設定
 │       ├── Dockerfile
 │       ├── go.mod / go.sum
 └── docker/
@@ -183,7 +175,7 @@ bootstrap → infrastructure:persistence  → domain           (+ JPA)
 
 ### payment-service (:8083)
 
-2段階決済: authorize（仮確保）→ capture（確定）。Kotlin 版と Go 版の2実装があり、API 互換。
+2段階決済: authorize（仮確保）→ capture（確定）。Go で実装。
 
 | エンドポイント | 説明 |
 |---|---|
@@ -254,6 +246,7 @@ Idempotency-Key: create-order-ORD-001
 ### 前提条件
 
 - Java 17+
+- Go 1.23+
 - Docker / Docker Compose
 
 ### 1. インフラ起動
@@ -289,13 +282,9 @@ go build ./...
 cd kotlin
 ./gradlew :orchestrator:bootstrap:bootRun
 ./gradlew :order-service:bootstrap:bootRun
-./gradlew :payment-service:bootstrap:bootRun       # Kotlin 版
 ./gradlew :compensation-service:bootstrap:bootRun
-```
 
-Go 版 payment-service を使う場合（Kotlin 版の代わりに起動）:
-
-```bash
+# payment-service (Go)
 cd go/payment-service
 DATABASE_URL=postgres://saga:saga@localhost:5432/payment_db?sslmode=disable go run ./cmd/server
 ```
@@ -390,14 +379,15 @@ go test ./...
 # 1. インフラ起動
 cd docker && docker compose up -d postgres localstack
 
-# 2. JAR ビルド
+# 2. JAR ビルド + Go バイナリビルド
 cd kotlin && ./gradlew bootJar -x test
+cd go/payment-service && go build -o /tmp/payment-service ./cmd/server/
 
 # 3. 各サービス起動
-java -jar order-service/bootstrap/build/libs/bootstrap.jar &
-java -jar payment-service/bootstrap/build/libs/bootstrap.jar &
-java -jar compensation-service/bootstrap/build/libs/bootstrap.jar &
-java -jar orchestrator/bootstrap/build/libs/bootstrap.jar &
+java -jar kotlin/order-service/bootstrap/build/libs/bootstrap.jar &
+java -jar kotlin/compensation-service/bootstrap/build/libs/bootstrap.jar &
+java -jar kotlin/orchestrator/bootstrap/build/libs/bootstrap.jar &
+DATABASE_URL=postgres://saga:saga@localhost:5432/payment_db?sslmode=disable /tmp/payment-service &
 
 # 4. E2E テスト実行
 ./gradlew :e2e-test:test
